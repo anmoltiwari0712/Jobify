@@ -681,37 +681,71 @@
 
 
 
+    // Check autocomplete first across all mappings. It is a strong browser-level signal.
     for (const [profileKey, mapping] of Object.entries(FIELD_MAP)) {
-      // Check autocomplete first (most reliable signal)
       const autoVal = input.getAttribute("autocomplete") || "";
       if (mapping.autocomplete && mapping.autocomplete.includes(autoVal.toLowerCase())) {
         return profileKey;
       }
+    }
 
 
 
-      // Check data-automation-id (Workday)
-      const daId = input.getAttribute("data-automation-id") || "";
-      if (mapping.dataAutomation && mapping.dataAutomation.some(d => daId.includes(d))) {
+    // Check data-automation-id next. Workday commonly uses this.
+    const daId = (input.getAttribute("data-automation-id") || "").toLowerCase();
+    for (const [profileKey, mapping] of Object.entries(FIELD_MAP)) {
+      if (mapping.dataAutomation && mapping.dataAutomation.some(d => daId.includes(d.toLowerCase()))) {
         return profileKey;
       }
+    }
 
 
 
-      // Check input type (e.g., type="email", type="tel")
+    // Check input type (e.g., type="email", type="tel").
+    for (const [profileKey, mapping] of Object.entries(FIELD_MAP)) {
       if (mapping.inputTypes && mapping.inputTypes.includes(input.type)) {
         return profileKey;
       }
+    }
 
 
 
-      // Check all other attributes
+    // Prefer exact attribute matches before partial matches so fields like
+    // "addresscity" resolve to city instead of the broader address key.
+    for (const [profileKey, mapping] of Object.entries(FIELD_MAP)) {
       for (const attr of attrs) {
         if (!attr) continue;
         const normalized = attr.replace(/[^a-z0-9]/g, "");
         for (const candidate of mapping.attributes) {
           const normalizedCandidate = candidate.replace(/[^a-z0-9]/g, "");
-          if (normalized === normalizedCandidate || normalized.includes(normalizedCandidate)) {
+          if (normalized === normalizedCandidate) {
+            return profileKey;
+          }
+        }
+      }
+    }
+
+
+
+    // Fall back to partial attribute matches, but avoid tiny/generic candidates
+    // stealing more specific fields. Example: cards[address][field2] should
+    // still be allowed to match its visible City label later.
+    const genericPartialAttrs = new Set([
+      "address", "name", "city", "state", "zip", "country", "phone", "email",
+      "title", "degree", "race", "gender", "skills", "website", "github"
+    ]);
+
+    for (const [profileKey, mapping] of Object.entries(FIELD_MAP)) {
+      for (const attr of attrs) {
+        if (!attr) continue;
+        const normalized = attr.replace(/[^a-z0-9]/g, "");
+        for (const candidate of mapping.attributes) {
+          const normalizedCandidate = candidate.replace(/[^a-z0-9]/g, "");
+          if (
+            normalizedCandidate.length >= 5
+            && !genericPartialAttrs.has(normalizedCandidate)
+            && normalized.includes(normalizedCandidate)
+          ) {
             return profileKey;
           }
         }
@@ -726,6 +760,59 @@
   // STRATEGY 2: Label Matching
   // Finds the <label> element associated with the input and matches text
   // =========================================================================
+  function cleanLabelText(text) {
+    return text
+      .toLowerCase()
+      .replace(/\s*\*\s*$/, "")
+      .replace(/\s*\(required\)\s*/i, "")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+
+
+  function matchesLabelText(text, label) {
+    return text === label
+      || text.startsWith(label + " ")
+      || text.startsWith(label + " -")
+      || text.startsWith(label + ":")
+      || text.endsWith(" " + label);
+  }
+
+
+
+  function getLabelCandidates() {
+    return Object.entries(FIELD_MAP)
+      .flatMap(([profileKey, mapping]) => (
+        mapping.labels.map(label => ({ profileKey, label }))
+      ))
+      .sort((a, b) => b.label.length - a.label.length);
+  }
+
+
+
+  function findProfileKeyByLabelText(labelText) {
+    for (const { profileKey, label } of getLabelCandidates()) {
+      if (labelText === label) {
+        return profileKey;
+      }
+    }
+
+
+
+    for (const { profileKey, label } of getLabelCandidates()) {
+      if (matchesLabelText(labelText, label)) {
+        return profileKey;
+      }
+    }
+
+
+
+    return null;
+  }
+
+
+
   function matchByLabel(input) {
     let labelText = "";
 
@@ -788,16 +875,13 @@
 
 
     // Clean common suffixes
-    labelText = labelText.replace(/\s*\*\s*$/, "").replace(/\s*\(required\)\s*/i, "").trim();
+    labelText = cleanLabelText(labelText);
 
 
 
-    for (const [profileKey, mapping] of Object.entries(FIELD_MAP)) {
-      for (const label of mapping.labels) {
-        if (labelText === label || labelText.startsWith(label + " ") || labelText.endsWith(" " + label)) {
-          return profileKey;
-        }
-      }
+    const labelMatch = findProfileKeyByLabelText(labelText);
+    if (labelMatch) {
+      return labelMatch;
     }
 
 
@@ -854,7 +938,7 @@
     for (let i = 0; i < 3 && el.parentElement; i++) {
       el = el.parentElement;
       const className = (el.className || "").toString().toLowerCase();
-      const text = el.textContent.trim().toLowerCase().slice(0, 100);
+      const text = cleanLabelText(el.textContent).slice(0, 100);
 
 
 
@@ -866,11 +950,8 @@
         }
         // Only match on text if this container is small (to avoid false positives)
         if (text.length < 50) {
-          for (const label of mapping.labels) {
-            if (text.includes(label)) {
-              return profileKey;
-            }
-          }
+          const labelMatch = findProfileKeyByLabelText(text);
+          if (labelMatch) return labelMatch;
         }
       }
     }
@@ -1025,8 +1106,18 @@
 
 
 
+    function addInputs(root) {
+      root.querySelectorAll(selectors.join(", ")).forEach(el => {
+        if (!inputs.includes(el)) {
+          inputs.push(el);
+        }
+      });
+    }
+
+
+
     // Main document
-    document.querySelectorAll(selectors.join(", ")).forEach(el => inputs.push(el));
+    addInputs(document);
 
 
 
@@ -1036,7 +1127,7 @@
         try {
           const doc = iframe.contentDocument || iframe.contentWindow?.document;
           if (doc) {
-            doc.querySelectorAll(selectors.join(", ")).forEach(el => inputs.push(el));
+            addInputs(doc);
           }
         } catch (e) {
           // Cross-origin iframe, skip
@@ -1050,7 +1141,7 @@
     function searchShadow(root) {
       root.querySelectorAll("*").forEach(el => {
         if (el.shadowRoot) {
-          el.shadowRoot.querySelectorAll(selectors.join(", ")).forEach(inp => inputs.push(inp));
+          addInputs(el.shadowRoot);
           searchShadow(el.shadowRoot);
         }
       });
@@ -1059,11 +1150,34 @@
 
 
 
-    // Filter out invisible fields
-    return inputs.filter(el => {
+    function isVisibleField(el) {
       const style = window.getComputedStyle(el);
-      return style.display !== "none" && style.visibility !== "hidden" && el.offsetParent !== null;
-    });
+      if (style.display === "none" || style.visibility === "hidden") {
+        return false;
+      }
+
+
+
+      const rects = Array.from(el.getClientRects());
+      if (rects.some(rect => rect.width > 0 && rect.height > 0)) {
+        return true;
+      }
+
+
+
+      // Some ATS widgets report no offset parent even when their custom field
+      // is still interactive. Keep those instead of dropping the whole page.
+      return el.offsetParent !== null
+        || Boolean(el.getAttribute("data-automation-id"))
+        || el.getAttribute("role") === "textbox"
+        || el.getAttribute("role") === "combobox"
+        || el.isContentEditable;
+    }
+
+
+
+    const visibleInputs = inputs.filter(isVisibleField);
+    return visibleInputs.length > 0 ? visibleInputs : inputs;
   }
 
 
