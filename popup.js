@@ -31,13 +31,7 @@
     // Links
     "linkedin", "website", "github", "twitter",
     // EEO
-    "race", "veteranStatus", "disabilityStatus",
-    // Emergency Contact
-    "emergencyName", "emergencyPhone", "emergencyRelation",
-    // Bank
-    "bankName", "bankAccount", "ifscCode",
-    // Medical
-    "bloodGroup"
+    "race", "veteranStatus", "disabilityStatus"
   ];
 
 
