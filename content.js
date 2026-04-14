@@ -1106,18 +1106,8 @@
 
 
 
-    function addInputs(root) {
-      root.querySelectorAll(selectors.join(", ")).forEach(el => {
-        if (!inputs.includes(el)) {
-          inputs.push(el);
-        }
-      });
-    }
-
-
-
     // Main document
-    addInputs(document);
+    document.querySelectorAll(selectors.join(", ")).forEach(el => inputs.push(el));
 
 
 
@@ -1127,7 +1117,7 @@
         try {
           const doc = iframe.contentDocument || iframe.contentWindow?.document;
           if (doc) {
-            addInputs(doc);
+            doc.querySelectorAll(selectors.join(", ")).forEach(el => inputs.push(el));
           }
         } catch (e) {
           // Cross-origin iframe, skip
@@ -1141,7 +1131,7 @@
     function searchShadow(root) {
       root.querySelectorAll("*").forEach(el => {
         if (el.shadowRoot) {
-          addInputs(el.shadowRoot);
+          el.shadowRoot.querySelectorAll(selectors.join(", ")).forEach(inp => inputs.push(inp));
           searchShadow(el.shadowRoot);
         }
       });
@@ -1150,34 +1140,11 @@
 
 
 
-    function isVisibleField(el) {
+    // Filter out invisible fields
+    return inputs.filter(el => {
       const style = window.getComputedStyle(el);
-      if (style.display === "none" || style.visibility === "hidden") {
-        return false;
-      }
-
-
-
-      const rects = Array.from(el.getClientRects());
-      if (rects.some(rect => rect.width > 0 && rect.height > 0)) {
-        return true;
-      }
-
-
-
-      // Some ATS widgets report no offset parent even when their custom field
-      // is still interactive. Keep those instead of dropping the whole page.
-      return el.offsetParent !== null
-        || Boolean(el.getAttribute("data-automation-id"))
-        || el.getAttribute("role") === "textbox"
-        || el.getAttribute("role") === "combobox"
-        || el.isContentEditable;
-    }
-
-
-
-    const visibleInputs = inputs.filter(isVisibleField);
-    return visibleInputs.length > 0 ? visibleInputs : inputs;
+      return style.display !== "none" && style.visibility !== "hidden" && el.offsetParent !== null;
+    });
   }
 
 
