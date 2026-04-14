@@ -1,6 +1,6 @@
-# JobFill
+# Jobify
 
-JobFill is a Chrome extension that stores a local job-application profile and uses it to auto-fill application forms. It is built to detect common field patterns used by job platforms such as Workday, Greenhouse, Lever-style forms, and custom ATS pages.
+Jobify is a Chrome extension that stores a local job-application profile and uses it to auto-fill application forms. It is built to detect common field patterns used by job platforms such as Workday, Greenhouse, Lever-style forms, and custom ATS pages.
 
 ## Current Scope
 
