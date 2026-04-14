@@ -370,7 +370,7 @@
         "ugcourse", "ug_course"
       ],
       autocomplete: [],
-      dataAutomation: [],
+      dataAutomation: ["formField-degree"],
     },
     ugSpecialization: {
       labels: [
@@ -388,30 +388,32 @@
     ugCollege: {
       labels: [
         "ug college", "college name", "university name", "college",
-        "university", "institution", "ug institution"
+        "university", "institution", "ug institution", "school or university",
+        "school/university"
       ],
       attributes: [
         "ugcollege", "ug_college", "collegename", "college_name",
         "universityname", "university_name", "college", "university",
-        "institution", "uginstitution"
+        "institution", "uginstitution", "schoolname", "school_name"
       ],
       autocomplete: [],
-      dataAutomation: [],
+      dataAutomation: ["formField-schoolName"],
     },
     ugPercentage: {
       labels: [
         "ug percentage", "ug cgpa", "ug gpa", "graduation percentage",
         "degree percentage", "college cgpa", "college gpa", "undergraduate gpa",
-        "ug marks", "bachelor's gpa"
+        "ug marks", "bachelor's gpa", "overall result", "overall result gpa",
+        "grade average", "gpa"
       ],
       attributes: [
         "ugpercentage", "ug_percentage", "ugcgpa", "ug_cgpa", "uggpa",
         "ug_gpa", "graduationpercentage", "graduation_percentage",
         "degreepercentage", "collegecgpa", "college_cgpa",
-        "undergraduategpa", "ugmarks"
+        "undergraduategpa", "ugmarks", "gradeaverage", "grade_average"
       ],
       autocomplete: [],
-      dataAutomation: [],
+      dataAutomation: ["formField-gradeAverage"],
     },
     ugYear: {
       labels: [
@@ -511,11 +513,11 @@
     experience: {
       labels: [
         "years of experience", "total experience", "experience",
-        "work experience", "professional experience"
+        "professional experience"
       ],
       attributes: [
         "experience", "yearsofexperience", "years_of_experience",
-        "totalexperience", "total_experience", "work_experience"
+        "totalexperience", "total_experience"
       ],
       autocomplete: [],
       dataAutomation: [],
@@ -668,11 +670,16 @@
   // Checks name, id, autocomplete, data-automation-id, aria-label
   // =========================================================================
   function matchByAttributes(input) {
+    const automationHost = input.closest?.("[data-automation-id], [data-fkit-id]");
+    const hostAutomationId = (automationHost?.getAttribute("data-automation-id") || "").toLowerCase();
+    const hostFkitId = (automationHost?.getAttribute("data-fkit-id") || "").toLowerCase();
     const attrs = [
       (input.getAttribute("name") || "").toLowerCase().replace(/[\[\]{}().]/g, ""),
       (input.getAttribute("id") || "").toLowerCase(),
       (input.getAttribute("autocomplete") || "").toLowerCase(),
       (input.getAttribute("data-automation-id") || "").toLowerCase(),
+      hostAutomationId,
+      hostFkitId,
       (input.getAttribute("aria-label") || "").toLowerCase(),
       (input.getAttribute("data-testid") || "").toLowerCase(),
       (input.getAttribute("data-field") || "").toLowerCase(),
@@ -691,10 +698,29 @@
 
 
 
-    // Check data-automation-id next. Workday commonly uses this.
-    const daId = (input.getAttribute("data-automation-id") || "").toLowerCase();
+    // Check data-automation-id next. Workday commonly uses this. Prefer exact
+    // matches so generic keys like "name" do not steal "formField-schoolName".
+    const daId = `${input.getAttribute("data-automation-id") || ""} ${hostAutomationId}`.toLowerCase();
+    const normalizedDaId = daId.replace(/[^a-z0-9]/g, "");
     for (const [profileKey, mapping] of Object.entries(FIELD_MAP)) {
-      if (mapping.dataAutomation && mapping.dataAutomation.some(d => daId.includes(d.toLowerCase()))) {
+      if (mapping.dataAutomation && mapping.dataAutomation.some(d => normalizedDaId === d.toLowerCase().replace(/[^a-z0-9]/g, ""))) {
+        return profileKey;
+      }
+    }
+
+
+
+    const genericAutomationAttrs = new Set(["name"]);
+    for (const [profileKey, mapping] of Object.entries(FIELD_MAP)) {
+      if (
+        mapping.dataAutomation
+        && mapping.dataAutomation.some(d => {
+          const normalizedCandidate = d.toLowerCase().replace(/[^a-z0-9]/g, "");
+          return !genericAutomationAttrs.has(normalizedCandidate)
+            && normalizedCandidate.length >= 5
+            && normalizedDaId.includes(normalizedCandidate);
+        })
+      ) {
         return profileKey;
       }
     }
@@ -732,7 +758,8 @@
     // still be allowed to match its visible City label later.
     const genericPartialAttrs = new Set([
       "address", "name", "city", "state", "zip", "country", "phone", "email",
-      "title", "degree", "race", "gender", "skills", "website", "github"
+      "title", "degree", "experience", "workexperience", "race", "gender",
+      "skills", "website", "github"
     ]);
 
     for (const [profileKey, mapping] of Object.entries(FIELD_MAP)) {
@@ -963,7 +990,32 @@
   // =========================================================================
   // MASTER FIELD DETECTOR – Runs all strategies with priority
   // =========================================================================
+  function isUnsupportedWorkExperienceField(input) {
+    const rawIdentity = [
+      input.getAttribute("id") || "",
+      input.getAttribute("name") || "",
+      input.getAttribute("data-automation-id") || "",
+      input.closest?.("[data-automation-id], [data-fkit-id]")?.getAttribute("data-fkit-id") || "",
+    ].join(" ").toLowerCase();
+
+    if (!rawIdentity.includes("workexperience")) {
+      return false;
+    }
+
+
+
+    return !/(jobtitle|companyname)/i.test(rawIdentity);
+  }
+
+
+
   function detectField(input) {
+    if (isUnsupportedWorkExperienceField(input)) {
+      return null;
+    }
+
+
+
     // Priority order: attributes → label → placeholder → context
     return matchByAttributes(input)
       || matchByLabel(input)
@@ -987,7 +1039,13 @@
 
 
     // Skip hidden, submit, button, file fields
-    if (["hidden", "submit", "button", "file", "image"].includes(type)) return false;
+    if (["hidden", "submit", "file", "image"].includes(type)) return false;
+
+
+
+    if (tag === "button") {
+      return false; // Custom ATS dropdowns are detected, but not auto-selected yet.
+    }
 
 
 
@@ -1099,6 +1157,8 @@
       'input:not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="file"]):not([type="image"]):not([type="reset"])',
       "textarea",
       "select",
+      'button[aria-haspopup="listbox"]',
+      'button[role="combobox"]',
       '[contenteditable="true"]',
       '[role="textbox"]',
       '[role="combobox"]',
@@ -1143,7 +1203,10 @@
     // Filter out invisible fields
     return inputs.filter(el => {
       const style = window.getComputedStyle(el);
-      return style.display !== "none" && style.visibility !== "hidden" && el.offsetParent !== null;
+      const automationHost = el.closest?.("[data-automation-id], [data-fkit-id]");
+      return style.display !== "none"
+        && style.visibility !== "hidden"
+        && (el.offsetParent !== null || Boolean(automationHost));
     });
   }
 
