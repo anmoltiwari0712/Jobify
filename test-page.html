@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JobFill Test – Fake Job Application</title>
+  <style>
+    body { font-family: -apple-system, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 20px; background: #f5f6f8; color: #1a1a2e; }
+    h1 { font-size: 22px; margin-bottom: 4px; }
+    p.sub { color: #666; font-size: 14px; margin-bottom: 30px; }
+    .form-section { background: #fff; padding: 24px; border-radius: 10px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+    .form-section h2 { font-size: 15px; margin-bottom: 16px; color: #333; }
+    .row { display: flex; gap: 12px; margin-bottom: 12px; }
+    .field { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    label { font-size: 12px; font-weight: 600; color: #555; }
+    input, select, textarea { padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; font-family: inherit; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: #5b8cf7; box-shadow: 0 0 0 3px rgba(91,140,247,0.15); }
+    textarea { resize: vertical; min-height: 60px; }
+    .badge { display: inline-block; background: #5b8cf7; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-left: 8px; text-transform: uppercase; }
+  </style>
+</head>
+<body>
+  <h1>Acme Corp – Software Engineer <span class="badge">Test Form</span></h1>
+  <p class="sub">Use this page to test that JobFill correctly detects and fills all fields.</p>
+
+  <!-- STRATEGY 1 TEST: Standard name/id attributes -->
+  <div class="form-section">
+    <h2>Personal Information</h2>
+    <div class="row">
+      <div class="field">
+        <label for="firstName">First Name *</label>
+        <input type="text" id="firstName" name="firstName" placeholder="First name">
+      </div>
+      <div class="field">
+        <label for="lastName">Last Name *</label>
+        <input type="text" id="lastName" name="lastName" placeholder="Last name">
+      </div>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label for="email">Email Address *</label>
+        <input type="email" id="email" name="email" placeholder="you@example.com">
+      </div>
+      <div class="field">
+        <label for="phone">Phone Number</label>
+        <input type="tel" id="phone" name="phone" placeholder="+1 234 567 8900">
+      </div>
+    </div>
+  </div>
+
+  <!-- STRATEGY 2 TEST: Label-based matching (no useful name/id) -->
+  <div class="form-section">
+    <h2>Address (label-based detection test)</h2>
+    <div class="field" style="margin-bottom: 12px;">
+      <label for="addr_f1">Street Address</label>
+      <input type="text" id="addr_f1" name="cards[abc123][field0]">
+    </div>
+    <div class="row">
+      <div class="field">
+        <label for="addr_f2">City</label>
+        <input type="text" id="addr_f2" name="cards[abc123][field1]">
+      </div>
+      <div class="field">
+        <label for="addr_f3">State</label>
+        <input type="text" id="addr_f3" name="cards[abc123][field2]">
+      </div>
+      <div class="field">
+        <label for="addr_f4">Zip Code</label>
+        <input type="text" id="addr_f4" name="cards[abc123][field3]">
+      </div>
+    </div>
+    <div class="field" style="margin-top: 12px;">
+      <label for="addr_f5">Country</label>
+      <select id="addr_f5" name="cards[abc123][field4]">
+        <option value="">Select country</option>
+        <option value="US">United States</option>
+        <option value="UK">United Kingdom</option>
+        <option value="CA">Canada</option>
+        <option value="IN">India</option>
+        <option value="AU">Australia</option>
+        <option value="DE">Germany</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- STRATEGY 3 TEST: Placeholder-based matching -->
+  <div class="form-section">
+    <h2>Professional Info (placeholder detection test)</h2>
+    <div class="row">
+      <div class="field">
+        <input type="text" id="q_x1" name="q_x1" placeholder="Current Company">
+      </div>
+      <div class="field">
+        <input type="text" id="q_x2" name="q_x2" placeholder="Current Title">
+      </div>
+    </div>
+    <div class="row">
+      <div class="field">
+        <input type="text" id="q_x3" name="q_x3" placeholder="Years of experience">
+      </div>
+      <div class="field">
+        <input type="text" id="q_x4" name="q_x4" placeholder="Expected Salary">
+      </div>
+    </div>
+  </div>
+
+  <!-- STRATEGY 4 TEST: Autocomplete attribute -->
+  <div class="form-section">
+    <h2>Links (autocomplete attribute test)</h2>
+    <div class="field" style="margin-bottom: 12px;">
+      <label>LinkedIn Profile URL</label>
+      <input type="url" name="q_y1" placeholder="https://linkedin.com/in/...">
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>Portfolio / Website</label>
+        <input type="url" autocomplete="url" name="q_y2">
+      </div>
+      <div class="field">
+        <label>GitHub Profile</label>
+        <input type="url" name="q_y3" placeholder="https://github.com/...">
+      </div>
+    </div>
+  </div>
+
+  <!-- STRATEGY 5 TEST: Workday-style data-automation-id -->
+  <div class="form-section">
+    <h2>Workday-style fields (data-automation-id test)</h2>
+    <div class="row">
+      <div class="field">
+        <span style="font-size:12px; color:#555; font-weight:600;">Legal First Name</span>
+        <input type="text" data-automation-id="legalNameSection_firstName" name="wdField1">
+      </div>
+      <div class="field">
+        <span style="font-size:12px; color:#555; font-weight:600;">Legal Last Name</span>
+        <input type="text" data-automation-id="legalNameSection_lastName" name="wdField2">
+      </div>
+    </div>
+    <div class="field" style="margin-top: 12px;">
+      <span style="font-size:12px; color:#555; font-weight:600;">Email</span>
+      <input type="text" data-automation-id="email" name="wdField3">
+    </div>
+  </div>
+
+  <div style="text-align: center; color: #999; font-size: 12px; margin: 20px 0 40px;">
+    This is a test form. All fields use different detection strategies to verify JobFill works.
+  </div>
+</body>
+</html>
+ 
