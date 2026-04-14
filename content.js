@@ -1,8 +1,12 @@
 // content.js – Multi-strategy form field detection and filling engine
 // This is the heart of the extension. It uses layered detection to work across sites.
 
+
+
 (() => {
   "use strict";
+
+
 
   // =========================================================================
   // FIELD MAPPING DICTIONARY
@@ -11,6 +15,7 @@
   // and dataAutomation (for Workday-style sites).
   // =========================================================================
   const FIELD_MAP = {
+    // =========================== PERSONAL INFO ===========================
     firstName: {
       labels: ["first name", "given name", "first", "fname", "prénom"],
       attributes: [
@@ -30,6 +35,15 @@
       ],
       autocomplete: ["family-name"],
       dataAutomation: ["legalNameSection_lastName", "lastName"],
+    },
+    middleName: {
+      labels: ["middle name", "middle initial", "middle"],
+      attributes: [
+        "middlename", "middle_name", "middle-name", "middleinitial",
+        "middle_initial"
+      ],
+      autocomplete: ["additional-name"],
+      dataAutomation: ["legalNameSection_middleName"],
     },
     fullName: {
       labels: ["full name", "your name", "name", "applicant name"],
@@ -61,14 +75,97 @@
       dataAutomation: ["phone", "phoneNumber"],
       inputTypes: ["tel"],
     },
+    altPhone: {
+      labels: ["alternate phone", "alternative phone", "secondary phone", "home phone", "landline"],
+      attributes: [
+        "altphone", "alt_phone", "alternatephone", "alternate_phone",
+        "secondaryphone", "secondary_phone", "homephone", "home_phone", "landline"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+    dob: {
+      labels: ["date of birth", "dob", "birth date", "birthday"],
+      attributes: [
+        "dob", "dateofbirth", "date_of_birth", "date-of-birth",
+        "birthdate", "birth_date", "birthday"
+      ],
+      autocomplete: ["bday"],
+      dataAutomation: ["dateOfBirth"],
+    },
+    gender: {
+      labels: ["gender", "sex"],
+      attributes: ["gender", "sex", "genderidentity", "gender_identity"],
+      autocomplete: ["sex"],
+      dataAutomation: ["gender"],
+    },
+    maritalStatus: {
+      labels: ["marital status", "martial status"],
+      attributes: [
+        "maritalstatus", "marital_status", "marital-status",
+        "martialstatus"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+    nationality: {
+      labels: ["nationality", "citizenship"],
+      attributes: [
+        "nationality", "citizenship", "citizenshipstatus",
+        "citizenship_status"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+    fatherName: {
+      labels: ["father's name", "father name", "fathers name"],
+      attributes: [
+        "fathername", "father_name", "father-name", "fathersname",
+        "fathers_name"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+    motherName: {
+      labels: ["mother's name", "mother name", "mothers name"],
+      attributes: [
+        "mothername", "mother_name", "mother-name", "mothersname",
+        "mothers_name"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+    languages: {
+      labels: ["languages", "languages known", "language proficiency"],
+      attributes: [
+        "languages", "languagesknown", "languages_known", "languageproficiency",
+        "language_proficiency"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+
+
+
+    // =========================== ADDRESS ===========================
     address: {
-      labels: ["address", "street address", "address line 1", "street"],
+      labels: ["address", "street address", "address line 1", "street", "permanent address", "residential address"],
       attributes: [
         "address", "street", "address1", "address_line_1", "addressline1",
-        "street-address", "streetaddress"
+        "street-address", "streetaddress", "permanentaddress", "permanent_address",
+        "residentialaddress"
       ],
       autocomplete: ["street-address", "address-line1"],
       dataAutomation: ["addressSection_addressLine1"],
+    },
+    addressLine2: {
+      labels: ["address line 2", "apt", "suite", "apartment", "flat"],
+      attributes: [
+        "address2", "addressline2", "address_line_2", "address-line2",
+        "apt", "suite", "apartment", "flat", "unit"
+      ],
+      autocomplete: ["address-line2"],
+      dataAutomation: ["addressSection_addressLine2"],
     },
     city: {
       labels: ["city", "town", "city/town"],
@@ -106,6 +203,398 @@
       autocomplete: ["country", "country-name"],
       dataAutomation: ["addressSection_country"],
     },
+
+
+
+    // =========================== IDENTITY DOCUMENTS ===========================
+    panNumber: {
+      labels: ["pan", "pan number", "pan card", "pan card number", "permanent account number"],
+      attributes: [
+        "pan", "pannumber", "pan_number", "pan-number", "pancard",
+        "pan_card", "permanentaccountnumber"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+    aadharNumber: {
+      labels: ["aadhar", "aadhaar", "aadhar number", "aadhaar number", "aadhar card", "uid"],
+      attributes: [
+        "aadhar", "aadhaar", "aadharnumber", "aadhar_number", "aadhaarnumber",
+        "aadhaar_number", "uid", "uidnumber"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+    passportNumber: {
+      labels: ["passport", "passport number", "passport no"],
+      attributes: [
+        "passport", "passportnumber", "passport_number", "passport-number",
+        "passportno", "passport_no"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+    ssn: {
+      labels: ["ssn", "social security", "social security number"],
+      attributes: [
+        "ssn", "socialsecurity", "social_security", "social-security",
+        "socialsecuritynumber", "social_security_number"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+    drivingLicense: {
+      labels: ["driving license", "driver's license", "driving licence", "dl number", "license number"],
+      attributes: [
+        "drivinglicense", "driving_license", "driverslicense", "drivers_license",
+        "drivinglicence", "dlnumber", "dl_number", "licensenumber", "license_number"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+
+
+
+    // =========================== EDUCATION ===========================
+    highestQualification: {
+      labels: ["highest qualification", "highest degree", "highest education", "qualification"],
+      attributes: [
+        "highestqualification", "highest_qualification", "highestdegree",
+        "highest_degree", "highesteducation", "qualification"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+    tenthSchool: {
+      labels: ["10th school", "sslc school", "10th school name", "high school name", "secondary school"],
+      attributes: [
+        "tenthschool", "tenth_school", "sslcschool", "sslc_school",
+        "highschoolname", "secondary_school", "10thschool"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+    tenthBoard: {
+      labels: ["10th board", "sslc board", "10th board of education", "secondary board"],
+      attributes: [
+        "tenthboard", "tenth_board", "sslcboard", "sslc_board",
+        "10thboard", "secondaryboard", "secondary_board"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+    tenthPercentage: {
+      labels: [
+        "10th percentage", "10th marks", "10th cgpa", "10th gpa", "sslc percentage",
+        "sslc marks", "class 10 percentage", "class x percentage", "10th grade",
+        "10th score", "secondary percentage", "high school percentage"
+      ],
+      attributes: [
+        "tenthpercentage", "tenth_percentage", "10thpercentage", "10th_percentage",
+        "sslcpercentage", "sslc_percentage", "sslcmarks", "sslc_marks",
+        "tenthmarks", "tenth_marks", "class10percentage", "classx",
+        "secondarypercentage", "highschoolpercentage"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+    tenthYear: {
+      labels: ["10th year of passing", "10th passing year", "sslc year", "class 10 year"],
+      attributes: [
+        "tenthyear", "tenth_year", "10thyear", "10th_year",
+        "sslcyear", "sslc_year", "tenthpassingyear", "tenth_passing_year"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+    twelfthSchool: {
+      labels: ["12th school", "hsc school", "12th school name", "senior secondary school", "intermediate college"],
+      attributes: [
+        "twelfthschool", "twelfth_school", "hscschool", "hsc_school",
+        "12thschool", "seniorsecondaryschool", "intermediatecollege"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+    twelfthBoard: {
+      labels: ["12th board", "hsc board", "12th board of education", "senior secondary board"],
+      attributes: [
+        "twelfthboard", "twelfth_board", "hscboard", "hsc_board",
+        "12thboard", "seniorsecondaryboard"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+    twelfthPercentage: {
+      labels: [
+        "12th percentage", "12th marks", "12th cgpa", "12th gpa", "hsc percentage",
+        "hsc marks", "class 12 percentage", "class xii percentage", "12th grade",
+        "12th score", "senior secondary percentage", "intermediate percentage",
+        "plus two percentage", "+2 percentage"
+      ],
+      attributes: [
+        "twelfthpercentage", "twelfth_percentage", "12thpercentage", "12th_percentage",
+        "hscpercentage", "hsc_percentage", "hscmarks", "hsc_marks",
+        "twelfthmarks", "twelfth_marks", "class12percentage", "classxii",
+        "seniorsecondarypercentage", "intermediatepercentage", "plustwo"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+    twelfthYear: {
+      labels: ["12th year of passing", "12th passing year", "hsc year", "class 12 year"],
+      attributes: [
+        "twelfthyear", "twelfth_year", "12thyear", "12th_year",
+        "hscyear", "hsc_year", "twelfthpassingyear", "twelfth_passing_year"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+    twelfthStream: {
+      labels: ["12th stream", "12th specialization", "hsc stream", "stream", "12th group"],
+      attributes: [
+        "twelfthstream", "twelfth_stream", "12thstream", "hscstream",
+        "hsc_stream", "stream", "12thgroup"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+    ugDegree: {
+      labels: [
+        "ug degree", "undergraduate degree", "bachelor's degree", "bachelors degree",
+        "degree", "graduation", "ug course"
+      ],
+      attributes: [
+        "ugdegree", "ug_degree", "undergraddegree", "undergrad_degree",
+        "bachelorsdegree", "bachelors_degree", "degree", "graduation",
+        "ugcourse", "ug_course"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+    ugSpecialization: {
+      labels: [
+        "ug specialization", "ug major", "major", "specialization",
+        "branch", "department", "field of study", "ug branch"
+      ],
+      attributes: [
+        "ugspecialization", "ug_specialization", "ugmajor", "ug_major",
+        "major", "specialization", "branch", "department", "fieldofstudy",
+        "field_of_study", "ugbranch", "ug_branch"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+    ugCollege: {
+      labels: [
+        "ug college", "college name", "university name", "college",
+        "university", "institution", "ug institution"
+      ],
+      attributes: [
+        "ugcollege", "ug_college", "collegename", "college_name",
+        "universityname", "university_name", "college", "university",
+        "institution", "uginstitution"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+    ugPercentage: {
+      labels: [
+        "ug percentage", "ug cgpa", "ug gpa", "graduation percentage",
+        "degree percentage", "college cgpa", "college gpa", "undergraduate gpa",
+        "ug marks", "bachelor's gpa"
+      ],
+      attributes: [
+        "ugpercentage", "ug_percentage", "ugcgpa", "ug_cgpa", "uggpa",
+        "ug_gpa", "graduationpercentage", "graduation_percentage",
+        "degreepercentage", "collegecgpa", "college_cgpa",
+        "undergraduategpa", "ugmarks"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+    ugYear: {
+      labels: [
+        "ug year of passing", "ug passing year", "graduation year",
+        "year of graduation", "college year", "ug completion year"
+      ],
+      attributes: [
+        "ugyear", "ug_year", "ugpassingyear", "ug_passing_year",
+        "graduationyear", "graduation_year", "yearofgraduation",
+        "collegeyear", "ugcompletionyear"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+    pgDegree: {
+      labels: [
+        "pg degree", "postgraduate degree", "master's degree", "masters degree",
+        "pg course", "postgraduation"
+      ],
+      attributes: [
+        "pgdegree", "pg_degree", "postgraddegree", "postgrad_degree",
+        "mastersdegree", "masters_degree", "pgcourse", "pg_course",
+        "postgraduation"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+    pgSpecialization: {
+      labels: [
+        "pg specialization", "pg major", "pg branch", "masters specialization",
+        "postgraduate specialization"
+      ],
+      attributes: [
+        "pgspecialization", "pg_specialization", "pgmajor", "pg_major",
+        "pgbranch", "pg_branch", "mastersspecialization",
+        "postgraduatespecialization"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+    pgCollege: {
+      labels: ["pg college", "pg university", "pg institution", "masters college"],
+      attributes: [
+        "pgcollege", "pg_college", "pguniversity", "pg_university",
+        "pginstitution", "pg_institution", "masterscollege"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+    pgPercentage: {
+      labels: [
+        "pg percentage", "pg cgpa", "pg gpa", "masters percentage",
+        "masters cgpa", "postgraduate gpa", "pg marks"
+      ],
+      attributes: [
+        "pgpercentage", "pg_percentage", "pgcgpa", "pg_cgpa", "pggpa",
+        "pg_gpa", "masterspercentage", "masterscgpa", "postgraduategpa",
+        "pgmarks"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+    pgYear: {
+      labels: [
+        "pg year of passing", "pg passing year", "pg completion year",
+        "masters year", "postgraduation year"
+      ],
+      attributes: [
+        "pgyear", "pg_year", "pgpassingyear", "pg_passing_year",
+        "pgcompletionyear", "mastersyear", "postgraduationyear"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+
+
+
+    // =========================== PROFESSIONAL ===========================
+    currentCompany: {
+      labels: ["current company", "current employer", "company", "employer", "organization"],
+      attributes: [
+        "company", "currentcompany", "current_company", "employer",
+        "current_employer", "organization"
+      ],
+      autocomplete: ["organization"],
+      dataAutomation: [],
+    },
+    currentTitle: {
+      labels: ["current title", "job title", "title", "position", "current position", "designation"],
+      attributes: [
+        "title", "jobtitle", "job_title", "job-title", "currenttitle",
+        "current_title", "position", "designation"
+      ],
+      autocomplete: ["organization-title"],
+      dataAutomation: [],
+    },
+    experience: {
+      labels: [
+        "years of experience", "total experience", "experience",
+        "work experience", "professional experience"
+      ],
+      attributes: [
+        "experience", "yearsofexperience", "years_of_experience",
+        "totalexperience", "total_experience", "work_experience"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+    currentCTC: {
+      labels: [
+        "current ctc", "current salary", "present salary", "current compensation",
+        "current annual salary", "ctc"
+      ],
+      attributes: [
+        "currentctc", "current_ctc", "currentsalary", "current_salary",
+        "presentsalary", "present_salary", "currentcompensation", "ctc"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+    expectedCTC: {
+      labels: [
+        "expected ctc", "expected salary", "desired salary", "salary expectation",
+        "expected compensation", "desired ctc"
+      ],
+      attributes: [
+        "expectedctc", "expected_ctc", "expectedsalary", "expected_salary",
+        "desiredsalary", "desired_salary", "salaryexpectation",
+        "expectedcompensation", "desiredctc"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+    noticePeriod: {
+      labels: ["notice period", "availability", "start date", "earliest start date"],
+      attributes: [
+        "noticeperiod", "notice_period", "notice-period",
+        "availability", "startdate", "start_date"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+    skills: {
+      labels: ["skills", "key skills", "technical skills", "skill set", "competencies"],
+      attributes: [
+        "skills", "keyskills", "key_skills", "technicalskills",
+        "technical_skills", "skillset", "skill_set", "competencies"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+    preferredLocation: {
+      labels: ["preferred location", "preferred work location", "desired location", "work location preference"],
+      attributes: [
+        "preferredlocation", "preferred_location", "desiredlocation",
+        "desired_location", "worklocation", "work_location",
+        "locationpreference", "location_preference"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+    previousCompany: {
+      labels: ["previous company", "last company", "previous employer", "last employer"],
+      attributes: [
+        "previouscompany", "previous_company", "lastcompany", "last_company",
+        "previousemployer", "previous_employer", "lastemployer"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+    previousTitle: {
+      labels: ["previous title", "last title", "previous designation", "previous position"],
+      attributes: [
+        "previoustitle", "previous_title", "lasttitle", "last_title",
+        "previousdesignation", "previousposition"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+
+
+
+    // =========================== LINKS ===========================
     linkedin: {
       labels: ["linkedin", "linkedin url", "linkedin profile", "linkedin profile url"],
       attributes: [
@@ -133,58 +622,119 @@
       autocomplete: [],
       dataAutomation: [],
     },
-    currentCompany: {
-      labels: ["current company", "current employer", "company", "employer", "organization"],
+    twitter: {
+      labels: ["twitter", "twitter url", "x profile", "twitter handle"],
       attributes: [
-        "company", "currentcompany", "current_company", "employer",
-        "current_employer", "organization"
-      ],
-      autocomplete: ["organization"],
-      dataAutomation: [],
-    },
-    currentTitle: {
-      labels: ["current title", "job title", "title", "position", "current position", "designation"],
-      attributes: [
-        "title", "jobtitle", "job_title", "job-title", "currenttitle",
-        "current_title", "position", "designation"
-      ],
-      autocomplete: ["organization-title"],
-      dataAutomation: [],
-    },
-    salary: {
-      labels: [
-        "salary", "expected salary", "desired salary", "salary expectation",
-        "current salary", "compensation"
-      ],
-      attributes: [
-        "salary", "expectedsalary", "expected_salary", "desiredsalary",
-        "desired_salary", "compensation", "current_salary"
+        "twitter", "twitterurl", "twitter_url", "twitter-url",
+        "twitterhandle", "twitter_handle", "xprofile"
       ],
       autocomplete: [],
       dataAutomation: [],
     },
-    noticePeriod: {
-      labels: ["notice period", "availability", "start date", "earliest start date"],
+
+
+
+    // =========================== EEO / DIVERSITY ===========================
+    race: {
+      labels: ["race", "race/ethnicity", "ethnicity"],
       attributes: [
-        "noticeperiod", "notice_period", "notice-period",
-        "availability", "startdate", "start_date"
+        "race", "ethnicity", "raceethnicity", "race_ethnicity"
       ],
       autocomplete: [],
       dataAutomation: [],
     },
-    experience: {
-      labels: [
-        "years of experience", "total experience", "experience",
-        "work experience", "professional experience"
-      ],
+    veteranStatus: {
+      labels: ["veteran status", "veteran", "protected veteran"],
       attributes: [
-        "experience", "yearsofexperience", "years_of_experience",
-        "totalexperience", "total_experience", "work_experience"
+        "veteranstatus", "veteran_status", "veteran", "protectedveteran"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+    disabilityStatus: {
+      labels: ["disability", "disability status", "do you have a disability"],
+      attributes: [
+        "disability", "disabilitystatus", "disability_status"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+
+
+
+    // =========================== EMERGENCY CONTACT ===========================
+    emergencyName: {
+      labels: ["emergency contact name", "emergency contact", "emergency person"],
+      attributes: [
+        "emergencycontactname", "emergency_contact_name", "emergencycontact",
+        "emergency_contact", "emergencyname", "emergency_name"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+    emergencyPhone: {
+      labels: ["emergency contact phone", "emergency phone", "emergency contact number"],
+      attributes: [
+        "emergencycontactphone", "emergency_contact_phone", "emergencyphone",
+        "emergency_phone", "emergencycontactnumber"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+    emergencyRelation: {
+      labels: ["emergency contact relationship", "relationship with emergency contact", "relation"],
+      attributes: [
+        "emergencycontactrelationship", "emergency_contact_relationship",
+        "emergencyrelation", "emergency_relation", "emergencyrelationship"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+
+
+
+    // =========================== BANK / PAYMENT (onboarding forms) ===========================
+    bankName: {
+      labels: ["bank name", "name of bank"],
+      attributes: [
+        "bankname", "bank_name", "bank-name", "nameofbank"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+    bankAccount: {
+      labels: ["bank account number", "account number", "bank account"],
+      attributes: [
+        "bankaccountnumber", "bank_account_number", "accountnumber",
+        "account_number", "bankaccount", "bank_account"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+    ifscCode: {
+      labels: ["ifsc code", "ifsc", "bank ifsc", "routing number"],
+      attributes: [
+        "ifsccode", "ifsc_code", "ifsc", "bankifsc", "routingnumber",
+        "routing_number"
+      ],
+      autocomplete: [],
+      dataAutomation: [],
+    },
+
+
+
+    // =========================== BLOOD GROUP / MEDICAL ===========================
+    bloodGroup: {
+      labels: ["blood group", "blood type"],
+      attributes: [
+        "bloodgroup", "blood_group", "blood-group", "bloodtype", "blood_type"
       ],
       autocomplete: [],
       dataAutomation: [],
     },
   };
+
+
 
   // =========================================================================
   // STRATEGY 1: Attribute Matching
@@ -202,6 +752,8 @@
       (input.getAttribute("placeholder") || "").toLowerCase(),
     ];
 
+
+
     for (const [profileKey, mapping] of Object.entries(FIELD_MAP)) {
       // Check autocomplete first (most reliable signal)
       const autoVal = input.getAttribute("autocomplete") || "";
@@ -209,16 +761,22 @@
         return profileKey;
       }
 
+
+
       // Check data-automation-id (Workday)
       const daId = input.getAttribute("data-automation-id") || "";
       if (mapping.dataAutomation && mapping.dataAutomation.some(d => daId.includes(d))) {
         return profileKey;
       }
 
+
+
       // Check input type (e.g., type="email", type="tel")
       if (mapping.inputTypes && mapping.inputTypes.includes(input.type)) {
         return profileKey;
       }
+
+
 
       // Check all other attributes
       for (const attr of attrs) {
@@ -235,6 +793,8 @@
     return null;
   }
 
+
+
   // =========================================================================
   // STRATEGY 2: Label Matching
   // Finds the <label> element associated with the input and matches text
@@ -242,17 +802,23 @@
   function matchByLabel(input) {
     let labelText = "";
 
+
+
     // Method A: <label for="inputId">
     if (input.id) {
       const label = document.querySelector(`label[for="${CSS.escape(input.id)}"]`);
       if (label) labelText = label.textContent.trim().toLowerCase();
     }
 
+
+
     // Method B: Input inside a <label>
     if (!labelText) {
       const parentLabel = input.closest("label");
       if (parentLabel) labelText = parentLabel.textContent.trim().toLowerCase();
     }
+
+
 
     // Method C: aria-labelledby
     if (!labelText) {
@@ -262,6 +828,8 @@
         if (labelEl) labelText = labelEl.textContent.trim().toLowerCase();
       }
     }
+
+
 
     // Method D: Preceding sibling or parent's text (common in custom forms)
     if (!labelText) {
@@ -286,10 +854,16 @@
       }
     }
 
+
+
     if (!labelText) return null;
+
+
 
     // Clean common suffixes
     labelText = labelText.replace(/\s*\*\s*$/, "").replace(/\s*\(required\)\s*/i, "").trim();
+
+
 
     for (const [profileKey, mapping] of Object.entries(FIELD_MAP)) {
       for (const label of mapping.labels) {
@@ -298,6 +872,8 @@
         }
       }
     }
+
+
 
     // Fuzzy: check if any label keyword is contained
     for (const [profileKey, mapping] of Object.entries(FIELD_MAP)) {
@@ -308,8 +884,12 @@
       }
     }
 
+
+
     return null;
   }
+
+
 
   // =========================================================================
   // STRATEGY 3: Placeholder Matching
@@ -317,6 +897,8 @@
   function matchByPlaceholder(input) {
     const placeholder = (input.getAttribute("placeholder") || "").toLowerCase().trim();
     if (!placeholder) return null;
+
+
 
     for (const [profileKey, mapping] of Object.entries(FIELD_MAP)) {
       for (const label of mapping.labels) {
@@ -333,6 +915,8 @@
     return null;
   }
 
+
+
   // =========================================================================
   // STRATEGY 4: Context Matching (surrounding DOM structure)
   // For tricky cases where the field itself has no useful attributes
@@ -344,6 +928,8 @@
       el = el.parentElement;
       const className = (el.className || "").toString().toLowerCase();
       const text = el.textContent.trim().toLowerCase().slice(0, 100);
+
+
 
       for (const [profileKey, mapping] of Object.entries(FIELD_MAP)) {
         for (const label of mapping.labels) {
@@ -364,6 +950,8 @@
     return null;
   }
 
+
+
   // =========================================================================
   // MASTER FIELD DETECTOR – Runs all strategies with priority
   // =========================================================================
@@ -375,30 +963,44 @@
       || matchByContext(input);
   }
 
+
+
   // =========================================================================
   // FORM FILLER – Sets values and triggers proper events
   // =========================================================================
   function setFieldValue(input, value) {
     if (!value) return false;
 
+
+
     const tag = input.tagName.toLowerCase();
     const type = (input.getAttribute("type") || "text").toLowerCase();
 
+
+
     // Skip hidden, submit, button, file fields
     if (["hidden", "submit", "button", "file", "image"].includes(type)) return false;
+
+
 
     if (tag === "select") {
       return setSelectValue(input, value);
     }
 
+
+
     if (type === "checkbox" || type === "radio") {
       return false; // Skip for now – these need special handling
     }
+
+
 
     // Text-like input or textarea
     const nativeInputValueSetter =
       Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set
       || Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value")?.set;
+
+
 
     if (nativeInputValueSetter) {
       nativeInputValueSetter.call(input, value);
@@ -406,30 +1008,44 @@
       input.value = value;
     }
 
+
+
     // Dispatch events in the right order to trigger React/Vue/Angular handlers
     input.dispatchEvent(new Event("focus", { bubbles: true }));
     input.dispatchEvent(new Event("input", { bubbles: true }));
     input.dispatchEvent(new Event("change", { bubbles: true }));
     input.dispatchEvent(new Event("blur", { bubbles: true }));
 
+
+
     // Also dispatch keyboard events for frameworks that listen to those
     input.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true }));
     input.dispatchEvent(new KeyboardEvent("keyup", { bubbles: true }));
 
+
+
     return true;
   }
+
+
 
   function setSelectValue(select, value) {
     const options = Array.from(select.options);
     const valueLower = value.toLowerCase().trim();
 
+
+
     // Try exact match first
     let match = options.find(o => o.value.toLowerCase() === valueLower || o.text.toLowerCase().trim() === valueLower);
+
+
 
     // Try contains match
     if (!match) {
       match = options.find(o => o.text.toLowerCase().includes(valueLower) || valueLower.includes(o.text.toLowerCase().trim()));
     }
+
+
 
     // Try fuzzy for countries (US, USA, United States, etc.)
     if (!match) {
@@ -450,6 +1066,8 @@
       }
     }
 
+
+
     if (match) {
       select.value = match.value;
       select.dispatchEvent(new Event("change", { bubbles: true }));
@@ -457,8 +1075,12 @@
       return true;
     }
 
+
+
     return false;
   }
+
+
 
   // =========================================================================
   // FIELD SCANNER – Finds all fillable fields on the page
@@ -474,8 +1096,12 @@
       '[role="combobox"]',
     ];
 
+
+
     // Main document
     document.querySelectorAll(selectors.join(", ")).forEach(el => inputs.push(el));
+
+
 
     // Check iframes (same-origin only)
     try {
@@ -491,6 +1117,8 @@
       });
     } catch (e) {}
 
+
+
     // Check shadow DOMs
     function searchShadow(root) {
       root.querySelectorAll("*").forEach(el => {
@@ -502,12 +1130,16 @@
     }
     searchShadow(document);
 
+
+
     // Filter out invisible fields
     return inputs.filter(el => {
       const style = window.getComputedStyle(el);
       return style.display !== "none" && style.visibility !== "hidden" && el.offsetParent !== null;
     });
   }
+
+
 
   // =========================================================================
   // COMPOSITE VALUE BUILDER – Handles fullName from first+last, etc.
@@ -518,13 +1150,19 @@
       return profile[profileKey];
     }
 
+
+
     // Composite: fullName from first + last
     if (profileKey === "fullName" && profile.firstName && profile.lastName) {
       return `${profile.firstName} ${profile.lastName}`;
     }
 
+
+
     return null;
   }
+
+
 
   // =========================================================================
   // MESSAGE HANDLER – Responds to popup commands
@@ -535,6 +1173,8 @@
       const inputs = getAllInputs();
       let filledCount = 0;
       const details = [];
+
+
 
       for (const input of inputs) {
         const profileKey = detectField(input);
@@ -557,12 +1197,18 @@
         }
       }
 
+
+
       sendResponse({ success: true, filled: filledCount, total: inputs.length, details });
     }
+
+
 
     if (message.action === "scanForm") {
       const inputs = getAllInputs();
       const fields = [];
+
+
 
       for (const input of inputs) {
         const profileKey = detectField(input);
@@ -576,11 +1222,17 @@
         });
       }
 
+
+
       sendResponse({ fields, total: inputs.length });
     }
 
+
+
     return true;
   });
+
+
 
   // Log that content script is ready
   console.log("[JobFill] Content script loaded and ready.");

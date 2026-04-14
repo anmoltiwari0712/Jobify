@@ -1,17 +1,50 @@
 // popup.js – Profile management, form filling trigger, and scan functionality
 
+
+
 (() => {
   "use strict";
 
+
+
   // Profile field IDs (must match both popup inputs and content script FIELD_MAP keys)
   const PROFILE_FIELDS = [
-    "firstName", "lastName", "email", "phone", "country",
-    "address", "city", "state", "zip",
-    "currentCompany", "currentTitle", "experience", "salary", "noticePeriod",
-    "linkedin", "website", "github"
+    // Personal
+    "firstName", "lastName", "middleName", "email", "phone", "altPhone",
+    "dob", "gender", "maritalStatus", "nationality", "fatherName", "motherName", "languages",
+    // Address
+    "address", "addressLine2", "city", "state", "zip", "country",
+    // Identity Documents
+    "panNumber", "aadharNumber", "passportNumber", "ssn", "drivingLicense",
+    // Education – 10th
+    "tenthSchool", "tenthBoard", "tenthPercentage", "tenthYear",
+    // Education – 12th
+    "twelfthSchool", "twelfthBoard", "twelfthPercentage", "twelfthYear", "twelfthStream",
+    // Education – UG
+    "ugDegree", "ugSpecialization", "ugCollege", "ugPercentage", "ugYear",
+    // Education – PG
+    "pgDegree", "pgSpecialization", "pgCollege", "pgPercentage", "pgYear",
+    // Professional
+    "currentCompany", "currentTitle", "experience", "currentCTC", "expectedCTC",
+    "noticePeriod", "skills", "preferredLocation", "previousCompany", "previousTitle",
+    "highestQualification",
+    // Links
+    "linkedin", "website", "github", "twitter",
+    // EEO
+    "race", "veteranStatus", "disabilityStatus",
+    // Emergency Contact
+    "emergencyName", "emergencyPhone", "emergencyRelation",
+    // Bank
+    "bankName", "bankAccount", "ifscCode",
+    // Medical
+    "bloodGroup"
   ];
 
+
+
   const STORAGE_KEY = "jobfill_profile";
+
+
 
   // =========================================================================
   // PROFILE STORAGE
@@ -28,6 +61,8 @@
     });
   }
 
+
+
   function saveProfile() {
     const profile = {};
     for (const field of PROFILE_FIELDS) {
@@ -38,9 +73,12 @@
     }
     chrome.storage.local.set({ [STORAGE_KEY]: profile }, () => {
       showSaveIndicator();
+      updateCompleteness();
     });
     return profile;
   }
+
+
 
   function getProfile() {
     return new Promise((resolve) => {
@@ -49,6 +87,8 @@
       });
     });
   }
+
+
 
   // Auto-save on every field change
   function setupAutoSave() {
@@ -60,6 +100,8 @@
     }
   }
 
+
+
   function debounce(fn, delay) {
     let timer;
     return function (...args) {
@@ -68,11 +110,15 @@
     };
   }
 
+
+
   function showSaveIndicator() {
     const indicator = document.getElementById("saveIndicator");
     indicator.classList.add("show");
     setTimeout(() => indicator.classList.remove("show"), 1500);
   }
+
+
 
   // =========================================================================
   // TAB SWITCHING
@@ -84,12 +130,28 @@
         tabs.forEach(t => t.classList.remove("active"));
         document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
 
+
+
         tab.classList.add("active");
         const panelId = `panel-${tab.dataset.tab}`;
         document.getElementById(panelId).classList.add("active");
       });
     });
   }
+
+
+  // =========================================================================
+  // PROFILE SECTION EXPAND / COLLAPSE
+  // =========================================================================
+  function setupSections() {
+    document.querySelectorAll(".section-header").forEach((header) => {
+      header.addEventListener("click", () => {
+        header.parentElement.classList.toggle("open");
+      });
+    });
+  }
+
+
 
   // =========================================================================
   // FILL FORM
@@ -99,14 +161,20 @@
       const profile = await getProfile();
       const filledFields = Object.values(profile).filter(v => v).length;
 
+
+
       if (filledFields === 0) {
         showStatus("warning", "⚠️", "No profile data. Fill in your profile first.");
         return;
       }
 
+
+
       const btn = document.getElementById("btnFill");
       btn.textContent = "Filling...";
       btn.disabled = true;
+
+
 
       chrome.runtime.sendMessage(
         { action: "fillForm", profile },
@@ -117,10 +185,14 @@
             Auto-Fill This Page
           `;
 
+
+
           if (chrome.runtime.lastError) {
             showStatus("error", "✗", "Could not reach page. Try refreshing.");
             return;
           }
+
+
 
           if (response && response.filled > 0) {
             showStatus("success", "✓", `Filled ${response.filled} of ${response.total} fields`);
@@ -134,6 +206,8 @@
     });
   }
 
+
+
   // =========================================================================
   // SCAN FORM
   // =========================================================================
@@ -145,25 +219,37 @@
           return;
         }
 
+
+
         const container = document.getElementById("scanResults");
         container.innerHTML = "";
         container.classList.add("show");
+
+
 
         if (response.fields.length === 0) {
           container.innerHTML = '<div style="color: var(--text-muted); font-size: 12px; padding: 8px 0;">No form fields found on this page.</div>';
           return;
         }
 
+
+
         const title = document.createElement("div");
         title.className = "section-title";
         title.textContent = `${response.fields.length} fields detected`;
         container.appendChild(title);
 
+
+
         for (const field of response.fields) {
           const item = document.createElement("div");
           item.className = "scan-item";
 
+
+
           const fieldId = field.name || field.id || field.placeholder || `<${field.tag}>`;
+
+
 
           item.innerHTML = `
             <span class="scan-field-name">${escapeHtml(fieldId)}</span>
@@ -176,6 +262,8 @@
       });
     });
   }
+
+
 
   // =========================================================================
   // SETTINGS
@@ -193,14 +281,20 @@
       URL.revokeObjectURL(url);
     });
 
+
+
     // Import
     document.getElementById("btnImport").addEventListener("click", () => {
       document.getElementById("importFile").click();
     });
 
+
+
     document.getElementById("importFile").addEventListener("change", (e) => {
       const file = e.target.files[0];
       if (!file) return;
+
+
 
       const reader = new FileReader();
       reader.onload = (event) => {
@@ -217,6 +311,8 @@
       reader.readAsText(file);
     });
 
+
+
     // Clear
     document.getElementById("btnClear").addEventListener("click", () => {
       if (confirm("Delete all saved profile data? This cannot be undone.")) {
@@ -231,6 +327,8 @@
     });
   }
 
+
+
   // =========================================================================
   // UTILITIES
   // =========================================================================
@@ -241,11 +339,33 @@
     setTimeout(() => status.classList.remove("show"), 4000);
   }
 
+
+
   function escapeHtml(str) {
     const div = document.createElement("div");
     div.textContent = str;
     return div.innerHTML;
   }
+
+
+
+  // =========================================================================
+  // PROFILE COMPLETENESS TRACKER
+  // =========================================================================
+  function updateCompleteness() {
+    let filled = 0;
+    for (const field of PROFILE_FIELDS) {
+      const input = document.getElementById(field);
+      if (input && input.value.trim()) filled++;
+    }
+    const pct = Math.round((filled / PROFILE_FIELDS.length) * 100);
+    const bar = document.getElementById("completenessBar");
+    const text = document.getElementById("completenessText");
+    if (bar) bar.style.width = pct + "%";
+    if (text) text.textContent = `${pct}% filled (${filled}/${PROFILE_FIELDS.length})`;
+  }
+
+
 
   // =========================================================================
   // INIT
@@ -254,9 +374,12 @@
     loadProfile();
     setupAutoSave();
     setupTabs();
+    setupSections();
     setupFillButton();
     setupScanButton();
     setupSettings();
+    // Update completeness after profile loads
+    setTimeout(updateCompleteness, 200);
   });
 })();
  
