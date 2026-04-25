@@ -1,21 +1,21 @@
 {
   "manifest_version": 3,
-  "name": "JobFill – Auto-Fill Job Applications",
+  "name": "Jobify - Auto-Fill Job Applications",
   "version": "1.0.0",
-  "description": "Fill out job applications instantly with your saved profile. Works on Workday, Greenhouse, Lever, and more.",
+  "description": "Fill job applications faster with a local-only profile stored in your browser.",
   "permissions": ["storage", "activeTab", "scripting"],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
-      "16": "icons/icon16.png",
-      "48": "icons/icon48.png",
-      "128": "icons/icon128.png"
+      "16": "Jobify_Logo_Favicon_Pack/icon16.png",
+      "48": "Jobify_Logo_Favicon_Pack/icon48.png",
+      "128": "Jobify_Logo_Favicon_Pack/icon128.png"
     }
   },
   "icons": {
-    "16": "icons/icon16.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
+    "16": "Jobify_Logo_Favicon_Pack/icon16.png",
+    "48": "Jobify_Logo_Favicon_Pack/icon48.png",
+    "128": "Jobify_Logo_Favicon_Pack/icon128.png"
   },
   "content_scripts": [
     {

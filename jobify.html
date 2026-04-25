@@ -1,0 +1,3356 @@
+<!DOCTYPE html> 
+
+<html lang="en"> 
+
+<head> 
+
+  <meta charset="UTF-8"> 
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+
+  <title>Jobify. Stop Retyping. Start Applying.</title> 
+
+  <meta name="description" content="Jobify auto-fills job applications instantly using your saved profile. Works on Workday, Greenhouse, Lever, and 1000+ sites. Free forever."> 
+  <link rel="apple-touch-icon" href="Jobify_Logo_Favicon_Pack/jobify-logo-1024.png">
+  <link rel="icon" type="image/png" href="Jobify_Logo_Favicon_Pack/jobify-logo-1024.png">
+  <link rel="shortcut icon" type="image/png" href="Jobify_Logo_Favicon_Pack/jobify-logo-1024.png">
+  <link rel="manifest" href="Jobify_Logo_Favicon_Pack/site.webmanifest">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"> 
+
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> 
+
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Satoshi:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"> 
+
+  <style> 
+
+    :root { 
+
+      --bg-deep: #08090c; 
+
+      --bg: #0c0e14; 
+
+      --bg-card: #12151e; 
+
+      --bg-elevated: #181c28; 
+
+      --border: #1e2333; 
+
+      --border-subtle: #161a26; 
+
+      --text: #e4e7f0; 
+
+      --text-secondary: #8890a8; 
+
+      --text-dim: #565e78; 
+
+      --accent: #4d7cf5; 
+
+      --accent-bright: #6b96ff; 
+
+      --accent-glow: rgba(77, 124, 245, 0.12); 
+
+      --accent-glow-strong: rgba(77, 124, 245, 0.25); 
+
+      --green: #34d399; 
+
+      --green-glow: rgba(52, 211, 153, 0.12); 
+
+      --orange: #f59e0b; 
+
+      --serif: 'Instrument Serif', Georgia, serif; 
+
+      --sans: 'Satoshi', -apple-system, BlinkMacSystemFont, sans-serif; 
+
+    } 
+
+ 
+
+    * { margin: 0; padding: 0; box-sizing: border-box; } 
+
+ 
+
+    html { scroll-behavior: smooth; } 
+
+ 
+
+    body { 
+
+      font-family: var(--sans); 
+
+      background: var(--bg-deep); 
+
+      color: var(--text); 
+
+      overflow-x: hidden; 
+
+      -webkit-font-smoothing: antialiased; 
+
+    } 
+
+ 
+
+    /* ===== NOISE TEXTURE OVERLAY ===== */ 
+
+    body::before { 
+
+      content: ''; 
+
+      position: fixed; 
+
+      top: 0; left: 0; width: 100%; height: 100%; 
+
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); 
+
+      pointer-events: none; 
+
+      z-index: 9999; 
+
+    } 
+
+ 
+
+    /* ===== GLOW BLOBS ===== */ 
+
+    .glow-blob { 
+
+      position: absolute; 
+
+      border-radius: 50%; 
+
+      filter: blur(120px); 
+
+      pointer-events: none; 
+
+      z-index: 0; 
+
+    } 
+
+    .glow-blob.blue { 
+
+      width: 600px; height: 600px; 
+
+      background: radial-gradient(circle, rgba(77,124,245,0.15) 0%, transparent 70%); 
+
+    } 
+
+    .glow-blob.green { 
+
+      width: 400px; height: 400px; 
+
+      background: radial-gradient(circle, rgba(52,211,153,0.1) 0%, transparent 70%); 
+
+    } 
+
+ 
+
+    /* ===== NAV ===== */ 
+
+    nav { 
+
+      position: fixed; top: 0; left: 0; right: 0; 
+
+      z-index: 100; 
+
+      padding: 16px 40px; 
+
+      display: flex; align-items: center; justify-content: space-between; 
+
+      background: rgba(8, 9, 12, 0.7); 
+
+      backdrop-filter: blur(20px) saturate(1.4); 
+
+      border-bottom: 1px solid var(--border-subtle); 
+
+      transition: all 0.3s; 
+
+    } 
+
+    nav.scrolled { 
+
+      padding: 12px 40px; 
+
+      background: rgba(8, 9, 12, 0.92); 
+
+    } 
+
+    .nav-logo { 
+
+      display: flex; align-items: center; gap: 0; 
+
+      text-decoration: none; color: var(--text); 
+
+    } 
+
+    .nav-logo-icon { 
+
+      width: 32px; height: 32px; 
+
+      border-radius: 8px; 
+      background: center / cover no-repeat url('Jobify_Logo_Favicon_Pack/jobify-logo-1024.png'); 
+      flex-shrink: 0; 
+
+      box-shadow: 0 0 20px var(--accent-glow-strong); 
+
+    } 
+
+    .nav-links { 
+
+      display: flex; align-items: center; gap: 32px; 
+
+      list-style: none; 
+
+    } 
+
+    .nav-links a { 
+
+      text-decoration: none; color: var(--text-secondary); 
+
+      font-size: 14px; font-weight: 500; 
+
+      transition: color 0.2s; 
+
+    } 
+
+    .nav-links a:hover { color: var(--text); } 
+
+    .nav-cta { 
+
+      padding: 8px 20px !important; 
+
+      background: var(--accent) !important; 
+
+      color: #fff !important; 
+
+      border-radius: 8px; 
+
+      font-weight: 600 !important; 
+
+      transition: all 0.2s !important; 
+
+      box-shadow: 0 2px 12px var(--accent-glow-strong); 
+
+    } 
+
+    .nav-cta:hover { 
+
+      background: var(--accent-bright) !important; 
+
+      transform: translateY(-1px); 
+
+      box-shadow: 0 4px 20px var(--accent-glow-strong); 
+
+    } 
+
+ 
+
+    /* ===== HERO ===== */ 
+
+    .hero { 
+
+      position: relative; 
+
+      min-height: 100vh; 
+
+      display: flex; 
+
+      flex-direction: column; 
+
+      align-items: center; 
+
+      justify-content: center; 
+
+      text-align: center; 
+
+      padding: 120px 24px 80px; 
+
+      overflow: hidden; 
+
+    } 
+
+    .hero .glow-blob.blue { top: -200px; left: 50%; transform: translateX(-50%); } 
+
+    .hero .glow-blob.green { bottom: -100px; right: -100px; } 
+
+ 
+
+    .hero-badge { 
+
+      display: inline-flex; align-items: center; gap: 8px; 
+
+      padding: 6px 16px 6px 8px; 
+
+      background: var(--bg-elevated); 
+
+      border: 1px solid var(--border); 
+
+      border-radius: 100px; 
+
+      font-size: 13px; font-weight: 500; 
+
+      color: var(--text-secondary); 
+
+      margin-bottom: 32px; 
+
+      animation: fadeUp 0.6s ease both; 
+
+    } 
+
+    .hero-badge-dot { 
+
+      width: 8px; height: 8px; 
+
+      background: var(--green); 
+
+      border-radius: 50%; 
+
+      box-shadow: 0 0 8px var(--green); 
+
+      animation: pulse 2s infinite; 
+
+    } 
+
+ 
+
+    .hero h1 { 
+
+      font-family: var(--serif); 
+
+      font-size: clamp(48px, 8vw, 88px); 
+
+      font-weight: 400; 
+
+      line-height: 1.05; 
+
+      letter-spacing: -2px; 
+
+      max-width: 900px; 
+
+      animation: fadeUp 0.6s ease 0.1s both; 
+
+    } 
+
+    .hero-sub { 
+
+      font-size: 18px; 
+
+      color: var(--text-secondary); 
+
+      max-width: 540px; 
+
+      line-height: 1.7; 
+
+      margin-top: 24px; 
+
+      animation: fadeUp 0.6s ease 0.2s both; 
+
+    } 
+
+ 
+
+    .hero-actions { 
+
+      display: flex; gap: 16px; 
+
+      margin-top: 40px; 
+
+      animation: fadeUp 0.6s ease 0.3s both; 
+
+    } 
+
+    .btn-primary { 
+
+      display: inline-flex; align-items: center; gap: 10px; 
+
+      padding: 14px 32px; 
+
+      background: var(--accent); 
+
+      color: #fff; 
+
+      border: none; border-radius: 10px; 
+
+      font-size: 16px; font-weight: 600; 
+
+      font-family: var(--sans); 
+
+      cursor: pointer; 
+
+      text-decoration: none; 
+
+      transition: all 0.25s; 
+
+      box-shadow: 0 4px 24px var(--accent-glow-strong); 
+
+    } 
+
+    .btn-primary:hover { 
+
+      background: var(--accent-bright); 
+
+      transform: translateY(-2px); 
+
+      box-shadow: 0 8px 32px var(--accent-glow-strong); 
+
+    } 
+
+    .btn-ghost { 
+
+      display: inline-flex; align-items: center; gap: 8px; 
+
+      padding: 14px 28px; 
+
+      background: transparent; 
+
+      color: var(--text-secondary); 
+
+      border: 1px solid var(--border); 
+
+      border-radius: 10px; 
+
+      font-size: 16px; font-weight: 500; 
+
+      font-family: var(--sans); 
+
+      cursor: pointer; 
+
+      text-decoration: none; 
+
+      transition: all 0.25s; 
+
+    } 
+
+    .btn-ghost:hover { 
+
+      color: var(--text); 
+
+      border-color: var(--text-dim); 
+
+      background: var(--bg-card); 
+
+    } 
+
+ 
+
+    /* HERO BROWSER MOCKUP */ 
+
+    .hero-visual { 
+
+      margin-top: 64px; 
+
+      width: 100%; 
+
+      max-width: 860px; 
+
+      animation: fadeUp 0.8s ease 0.4s both; 
+
+      position: relative; 
+
+      z-index: 1; 
+
+    } 
+
+    .browser-frame { 
+
+      background: var(--bg-card); 
+
+      border: 1px solid var(--border); 
+
+      border-radius: 14px; 
+
+      overflow: hidden; 
+
+      box-shadow: 0 40px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.03) inset; 
+
+    } 
+
+    .browser-bar { 
+
+      display: flex; align-items: center; gap: 8px; 
+
+      padding: 14px 18px; 
+
+      background: var(--bg-elevated); 
+
+      border-bottom: 1px solid var(--border); 
+
+    } 
+
+    .browser-dots { 
+
+      display: flex; gap: 6px; 
+
+    } 
+
+    .browser-dots span { 
+
+      width: 10px; height: 10px; border-radius: 50%; 
+
+    } 
+
+    .browser-dots span:nth-child(1) { background: #ef5350; } 
+
+    .browser-dots span:nth-child(2) { background: #f5a623; } 
+
+    .browser-dots span:nth-child(3) { background: #34d399; } 
+
+    .browser-url { 
+
+      flex: 1; 
+
+      margin-left: 12px; 
+
+      padding: 6px 14px; 
+
+      background: var(--bg); 
+
+      border-radius: 6px; 
+
+      font-size: 12px; 
+
+      color: var(--text-dim); 
+
+      border: 1px solid var(--border-subtle); 
+
+    } 
+
+    .browser-body { 
+
+      padding: 32px 40px; 
+
+      min-height: 300px; 
+
+    } 
+
+ 
+
+    /* FORM ANIMATION */ 
+
+    .demo-form { max-width: 600px; margin: 0 auto; } 
+
+    .demo-form-title { 
+
+      font-size: 16px; font-weight: 700; margin-bottom: 20px; 
+
+      color: var(--text-secondary); 
+
+    } 
+
+    .demo-row { display: flex; gap: 12px; margin-bottom: 12px; } 
+
+    .demo-field { flex: 1; } 
+
+    .demo-field-label { 
+
+      font-size: 11px; color: var(--text-dim); margin-bottom: 4px; 
+
+      font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; 
+
+    } 
+
+    .demo-field-input { 
+
+      width: 100%; 
+
+      padding: 10px 12px; 
+
+      background: var(--bg); 
+
+      border: 1px solid var(--border); 
+
+      border-radius: 6px; 
+
+      color: var(--text); 
+
+      font-family: var(--sans); 
+
+      font-size: 13px; 
+
+      transition: all 0.4s; 
+
+    } 
+
+    .demo-field-input.filled { 
+
+      border-color: var(--green); 
+
+      background: rgba(52, 211, 153, 0.04); 
+
+      box-shadow: 0 0 0 3px var(--green-glow); 
+
+    } 
+
+ 
+
+    /* ===== STATS STRIP ===== */ 
+
+    .stats { 
+
+      display: flex; 
+
+      justify-content: center; 
+
+      gap: 80px; 
+
+      padding: 60px 24px; 
+
+      border-top: 1px solid var(--border-subtle); 
+
+      border-bottom: 1px solid var(--border-subtle); 
+
+    } 
+
+    .stat { text-align: center; } 
+
+    .stat-number { 
+
+      font-family: var(--serif); 
+
+      font-size: 48px; 
+
+      color: var(--accent-bright); 
+
+      letter-spacing: -1px; 
+
+    } 
+
+    .stat-label { 
+
+      font-size: 14px; 
+
+      color: var(--text-dim); 
+
+      margin-top: 4px; 
+
+      font-weight: 500; 
+
+    } 
+
+ 
+
+    /* ===== FEATURES ===== */ 
+
+    .features { 
+
+      position: relative; 
+
+      padding: 120px 24px; 
+
+    } 
+
+    .features .glow-blob.blue { top: 100px; right: -200px; } 
+
+ 
+
+    .section-eyebrow { 
+
+      display: inline-flex; align-items: center; gap: 8px; 
+
+      font-size: 12px; font-weight: 700; text-transform: uppercase; 
+
+      letter-spacing: 2px; color: var(--accent); 
+
+      margin-bottom: 16px; 
+
+    } 
+
+    .section-eyebrow::before { 
+
+      content: ''; width: 20px; height: 1px; background: var(--accent); 
+
+    } 
+
+    .section-heading { 
+
+      font-family: var(--serif); 
+
+      font-size: clamp(36px, 5vw, 56px); 
+
+      line-height: 1.1; 
+
+      letter-spacing: -1.5px; 
+
+      max-width: 700px; 
+
+    } 
+
+    .section-heading em { 
+
+      font-style: italic; color: var(--accent-bright); 
+
+    } 
+
+    .section-desc { 
+
+      font-size: 17px; color: var(--text-secondary); 
+
+      max-width: 520px; line-height: 1.7; 
+
+      margin-top: 16px; 
+
+    } 
+
+ 
+
+    .features-header { 
+
+      text-align: center; 
+
+      margin: 0 auto 64px; 
+
+      display: flex; flex-direction: column; align-items: center; 
+
+    } 
+
+ 
+
+    .features-grid { 
+
+      display: grid; 
+
+      grid-template-columns: repeat(3, 1fr); 
+
+      gap: 20px; 
+
+      max-width: 1100px; 
+
+      margin: 0 auto; 
+
+    } 
+
+    .feature-card { 
+
+      padding: 36px 30px; 
+
+      background: var(--bg-card); 
+
+      border: 1px solid var(--border); 
+
+      border-radius: 16px; 
+
+      transition: all 0.3s; 
+
+      position: relative; 
+
+      overflow: hidden; 
+
+    } 
+
+    .feature-card::before { 
+
+      content: ''; 
+
+      position: absolute; 
+
+      top: 0; left: 0; right: 0; 
+
+      height: 2px; 
+
+      background: linear-gradient(90deg, transparent, var(--accent), transparent); 
+
+      opacity: 0; 
+
+      transition: opacity 0.3s; 
+
+    } 
+
+    .feature-card:hover { 
+
+      border-color: var(--accent); 
+
+      transform: translateY(-4px); 
+
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3); 
+
+    } 
+
+    .feature-card:hover::before { opacity: 1; } 
+
+ 
+
+    .feature-icon { 
+
+      width: 48px; height: 48px; 
+
+      border-radius: 12px; 
+
+      display: flex; align-items: center; justify-content: center; 
+
+      font-size: 22px; 
+
+      margin-bottom: 20px; 
+
+      background: var(--accent-glow); 
+
+      border: 1px solid rgba(77,124,245,0.15); 
+
+    } 
+
+    .feature-card h3 { 
+
+      font-size: 17px; font-weight: 700; 
+
+      margin-bottom: 8px; letter-spacing: -0.3px; 
+
+    } 
+
+    .feature-card p { 
+
+      font-size: 14px; color: var(--text-secondary); 
+
+      line-height: 1.65; 
+
+    } 
+
+ 
+
+    /* ===== HOW IT WORKS ===== */ 
+
+    .how-it-works { 
+
+      padding: 120px 24px; 
+
+      position: relative; 
+
+    } 
+
+    .how-it-works .glow-blob.green { top: 0; left: -200px; } 
+
+    .hiw-header { 
+
+      text-align: center; 
+
+      margin: 0 auto 72px; 
+
+      display: flex; flex-direction: column; align-items: center; 
+
+    } 
+
+    .hiw-steps { 
+
+      display: grid; 
+
+      grid-template-columns: repeat(3, 1fr); 
+
+      gap: 32px; 
+
+      max-width: 1000px; 
+
+      margin: 0 auto; 
+
+      position: relative; 
+
+    } 
+
+    .hiw-steps::before { 
+
+      content: ''; 
+
+      position: absolute; 
+
+      top: 40px; left: 16%; right: 16%; 
+
+      height: 1px; 
+
+      background: linear-gradient(90deg, transparent, var(--border), var(--border), transparent); 
+
+    } 
+
+    .hiw-step { 
+
+      text-align: center; 
+
+      position: relative; 
+
+      z-index: 1; 
+
+    } 
+
+    .hiw-step-number { 
+
+      width: 56px; height: 56px; 
+
+      margin: 0 auto 24px; 
+
+      border-radius: 16px; 
+
+      background: var(--bg-elevated); 
+
+      border: 1px solid var(--border); 
+
+      display: flex; align-items: center; justify-content: center; 
+
+      font-family: var(--serif); 
+
+      font-size: 24px; 
+
+      color: var(--accent-bright); 
+
+      font-style: italic; 
+
+    } 
+
+    .hiw-step h3 { 
+
+      font-size: 18px; font-weight: 700; 
+
+      margin-bottom: 8px; letter-spacing: -0.3px; 
+
+    } 
+
+    .hiw-step p { 
+
+      font-size: 14px; color: var(--text-secondary); line-height: 1.65; 
+
+      max-width: 280px; margin: 0 auto; 
+
+    } 
+
+ 
+
+    /* ===== PLATFORMS ===== */ 
+
+    .platforms { 
+
+      padding: 80px 24px; 
+
+      border-top: 1px solid var(--border-subtle); 
+
+      border-bottom: 1px solid var(--border-subtle); 
+
+      text-align: center; 
+
+    } 
+
+    .platforms-label { 
+
+      font-size: 13px; font-weight: 600; text-transform: uppercase; 
+
+      letter-spacing: 2px; color: var(--text-dim); margin-bottom: 32px; 
+
+    } 
+
+    .platform-logos { 
+
+      display: flex; align-items: center; justify-content: center; 
+
+      gap: 48px; flex-wrap: wrap; max-width: 900px; margin: 0 auto; 
+
+    } 
+
+    .platform-logo { 
+
+      font-size: 18px; font-weight: 700; color: var(--text-dim); 
+
+      letter-spacing: -0.5px; 
+
+      opacity: 0.5; 
+
+      transition: opacity 0.3s; 
+
+    } 
+
+    .platform-logo:hover { opacity: 1; } 
+
+ 
+
+    /* ===== PRICING ===== */ 
+
+    .pricing { 
+
+      padding: 120px 24px; 
+
+      position: relative; 
+
+    } 
+
+    .pricing .glow-blob.blue { top: -100px; left: 50%; transform: translateX(-50%); } 
+
+    .pricing-header { 
+
+      text-align: center; 
+
+      margin: 0 auto 64px; 
+
+      display: flex; flex-direction: column; align-items: center; 
+
+    } 
+
+    .pricing-grid { 
+
+      display: grid; 
+
+      grid-template-columns: repeat(2, 1fr); 
+
+      gap: 24px; 
+
+      max-width: 740px; 
+
+      margin: 0 auto; 
+
+    } 
+
+    .price-card { 
+
+      padding: 40px 36px; 
+
+      background: var(--bg-card); 
+
+      border: 1px solid var(--border); 
+
+      border-radius: 16px; 
+
+      transition: all 0.3s; 
+
+    } 
+
+    .price-card.featured { 
+
+      border-color: var(--accent); 
+
+      box-shadow: 0 0 40px var(--accent-glow); 
+
+      position: relative; 
+
+    } 
+
+    .price-card.featured::before { 
+
+      content: 'Most Popular'; 
+
+      position: absolute; 
+
+      top: -12px; right: 24px; 
+
+      padding: 4px 14px; 
+
+      background: var(--accent); 
+
+      color: #fff; 
+
+      border-radius: 6px; 
+
+      font-size: 11px; font-weight: 700; 
+
+      text-transform: uppercase; 
+
+      letter-spacing: 0.5px; 
+
+    } 
+
+    .price-tier { 
+
+      font-size: 13px; font-weight: 700; text-transform: uppercase; 
+
+      letter-spacing: 1.5px; color: var(--accent); 
+
+      margin-bottom: 8px; 
+
+    } 
+
+    .price-amount { 
+
+      font-family: var(--serif); 
+
+      font-size: 48px; 
+
+      letter-spacing: -2px; 
+
+      margin-bottom: 4px; 
+
+    } 
+
+    .price-amount span { 
+
+      font-family: var(--sans); 
+
+      font-size: 16px; 
+
+      color: var(--text-dim); 
+
+      font-weight: 400; 
+
+      letter-spacing: 0; 
+
+    } 
+
+    .price-desc { 
+
+      font-size: 14px; color: var(--text-secondary); 
+
+      margin-bottom: 28px; 
+
+    } 
+
+    .price-features { 
+
+      list-style: none; 
+
+      margin-bottom: 32px; 
+
+    } 
+
+    .price-features li { 
+
+      padding: 8px 0; 
+
+      font-size: 14px; 
+
+      color: var(--text-secondary); 
+
+      display: flex; align-items: center; gap: 10px; 
+
+    } 
+
+    .price-features li::before { 
+
+      content: '✓'; 
+
+      color: var(--green); 
+
+      font-weight: 700; 
+
+      font-size: 13px; 
+
+    } 
+
+    .price-btn { 
+
+      display: block; 
+
+      width: 100%; 
+
+      padding: 12px; 
+
+      text-align: center; 
+
+      border-radius: 10px; 
+
+      font-size: 15px; 
+
+      font-weight: 600; 
+
+      font-family: var(--sans); 
+
+      cursor: pointer; 
+
+      text-decoration: none; 
+
+      transition: all 0.25s; 
+
+    } 
+
+    .price-btn.primary { 
+
+      background: var(--accent); 
+
+      color: #fff; 
+
+      border: none; 
+
+      box-shadow: 0 4px 16px var(--accent-glow-strong); 
+
+    } 
+
+    .price-btn.primary:hover { 
+
+      background: var(--accent-bright); 
+
+      transform: translateY(-1px); 
+
+    } 
+
+    .price-btn.secondary { 
+
+      background: transparent; 
+
+      color: var(--text); 
+
+      border: 1px solid var(--border); 
+
+    } 
+
+    .price-btn.secondary:hover { 
+
+      border-color: var(--text-dim); 
+
+      background: var(--bg-elevated); 
+
+    } 
+
+ 
+
+    /* ===== COMING SOON ANNOUNCEMENT ===== */ 
+
+    .coming-soon { 
+
+      padding: 120px 24px; 
+
+      position: relative; 
+
+      overflow: hidden; 
+
+    } 
+
+    .glow-blob.orange-blob { 
+
+      position: absolute; 
+
+      width: 600px; height: 600px; 
+
+      top: -100px; left: 50%; transform: translateX(-50%); 
+
+      border-radius: 50%; 
+
+      background: radial-gradient(circle, rgba(245, 158, 11, 0.1) 0%, rgba(77,124,245,0.06) 50%, transparent 70%); 
+
+      filter: blur(120px); 
+
+      pointer-events: none; 
+
+    } 
+
+    .coming-soon-inner { 
+
+      max-width: 900px; 
+
+      margin: 0 auto; 
+
+      text-align: center; 
+
+      position: relative; 
+
+      z-index: 1; 
+
+    } 
+
+    .coming-soon-badge { 
+
+      display: inline-block; 
+
+      padding: 6px 20px; 
+
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05)); 
+
+      border: 1px solid rgba(245, 158, 11, 0.3); 
+
+      border-radius: 100px; 
+
+      font-size: 12px; 
+
+      font-weight: 800; 
+
+      letter-spacing: 3px; 
+
+      color: var(--orange); 
+
+      margin-bottom: 24px; 
+
+      animation: badgePulse 3s ease-in-out infinite; 
+
+    } 
+
+    @keyframes badgePulse { 
+
+      0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.2); } 
+
+      50% { box-shadow: 0 0 30px 8px rgba(245, 158, 11, 0.1); } 
+
+    } 
+
+    .coming-soon-heading { 
+
+      font-family: var(--serif); 
+
+      font-size: clamp(40px, 6vw, 64px); 
+
+      line-height: 1.1; 
+
+      letter-spacing: -2px; 
+
+      margin-bottom: 12px; 
+
+    } 
+
+    .coming-soon-heading em { 
+
+      font-style: italic; 
+
+      background: linear-gradient(135deg, var(--orange), var(--accent-bright)); 
+
+      -webkit-background-clip: text; 
+
+      -webkit-text-fill-color: transparent; 
+
+      background-clip: text; 
+
+    } 
+
+    .coming-soon-sub { 
+
+      font-size: 18px; 
+
+      color: var(--text-secondary); 
+
+      max-width: 500px; 
+
+      margin: 0 auto 48px; 
+
+      line-height: 1.7; 
+
+    } 
+
+    .coming-soon-cards { 
+
+      display: grid; 
+
+      grid-template-columns: 1fr 1fr; 
+
+      gap: 24px; 
+
+      margin-bottom: 48px; 
+
+    } 
+
+    .cs-card { 
+
+      padding: 36px 32px; 
+
+      background: var(--bg-card); 
+
+      border: 1px solid var(--border); 
+
+      border-radius: 16px; 
+
+      text-align: left; 
+
+      position: relative; 
+
+      overflow: hidden; 
+
+      transition: all 0.3s; 
+
+    } 
+
+    .cs-card::before { 
+
+      content: ''; 
+
+      position: absolute; 
+
+      top: 0; left: 0; right: 0; 
+
+      height: 3px; 
+
+      background: linear-gradient(90deg, var(--orange), var(--accent-bright)); 
+
+      opacity: 0.7; 
+
+    } 
+
+    .cs-card:hover { 
+
+      border-color: rgba(245, 158, 11, 0.3); 
+
+      transform: translateY(-4px); 
+
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3), 0 0 40px rgba(245, 158, 11, 0.05); 
+
+    } 
+
+    .cs-card-icon { 
+
+      font-size: 32px; 
+
+      margin-bottom: 16px; 
+
+    } 
+
+    .cs-card-tag { 
+
+      display: inline-block; 
+
+      padding: 3px 10px; 
+
+      background: rgba(245, 158, 11, 0.1); 
+
+      border: 1px solid rgba(245, 158, 11, 0.2); 
+
+      border-radius: 4px; 
+
+      font-size: 10px; 
+
+      font-weight: 700; 
+
+      letter-spacing: 1.5px; 
+
+      text-transform: uppercase; 
+
+      color: var(--orange); 
+
+      margin-bottom: 12px; 
+
+    } 
+
+    .cs-card h3 { 
+
+      font-size: 22px; 
+
+      font-weight: 800; 
+
+      letter-spacing: -0.5px; 
+
+      margin-bottom: 10px; 
+
+    } 
+
+    .cs-card p { 
+
+      font-size: 14px; 
+
+      color: var(--text-secondary); 
+
+      line-height: 1.7; 
+
+      margin-bottom: 20px; 
+
+    } 
+
+    .cs-card-status { 
+
+      display: inline-flex; 
+
+      align-items: center; 
+
+      gap: 8px; 
+
+      font-size: 12px; 
+
+      font-weight: 600; 
+
+      color: var(--orange); 
+
+    } 
+
+    .cs-status-dot { 
+
+      width: 8px; height: 8px; 
+
+      background: var(--orange); 
+
+      border-radius: 50%; 
+
+      animation: pulse 2s infinite; 
+
+      box-shadow: 0 0 8px rgba(245, 158, 11, 0.5); 
+
+    } 
+
+    .cs-notify { 
+
+      padding: 32px 40px; 
+
+      background: var(--bg-card); 
+
+      border: 1px solid var(--border); 
+
+      border-radius: 16px; 
+
+      max-width: 520px; 
+
+      margin: 0 auto; 
+
+    } 
+
+    .cs-notify p { 
+
+      font-size: 14px; 
+
+      color: var(--text-secondary); 
+
+      margin-bottom: 16px; 
+
+    } 
+
+    .cs-notify-form { 
+
+      display: flex; 
+
+      gap: 8px; 
+
+    } 
+
+    .cs-email-input { 
+
+      flex: 1; 
+
+      padding: 12px 16px; 
+
+      background: var(--bg); 
+
+      border: 1px solid var(--border); 
+
+      border-radius: 8px; 
+
+      color: var(--text); 
+
+      font-family: var(--sans); 
+
+      font-size: 14px; 
+
+      outline: none; 
+
+      transition: border-color 0.2s; 
+
+    } 
+
+    .cs-email-input:focus { 
+
+      border-color: var(--orange); 
+
+      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1); 
+
+    } 
+
+    .cs-email-input::placeholder { color: var(--text-dim); } 
+
+    .cs-notify-btn { 
+
+      padding: 12px 24px; 
+
+      background: linear-gradient(135deg, var(--orange), #e8890c); 
+
+      color: #fff; 
+
+      border: none; 
+
+      border-radius: 8px; 
+
+      font-size: 14px; 
+
+      font-weight: 700; 
+
+      font-family: var(--sans); 
+
+      cursor: pointer; 
+
+      transition: all 0.25s; 
+
+      white-space: nowrap; 
+
+      box-shadow: 0 4px 16px rgba(245, 158, 11, 0.25); 
+
+    } 
+
+    .cs-notify-btn:hover { 
+
+      transform: translateY(-1px); 
+
+      box-shadow: 0 6px 24px rgba(245, 158, 11, 0.3); 
+
+    } 
+
+ 
+
+    @media (max-width: 640px) { 
+
+      .coming-soon-cards { grid-template-columns: 1fr; } 
+
+      .cs-notify-form { flex-direction: column; } 
+
+      .bug-report-form-grid { grid-template-columns: 1fr !important; } 
+
+    } 
+
+ 
+
+    /* ===== BUG REPORT / HELP US ===== */ 
+
+    .bug-report { 
+
+      padding: 100px 24px; 
+
+      position: relative; 
+
+      border-top: 1px solid var(--border-subtle); 
+
+    } 
+
+    .bug-report-inner { 
+
+      max-width: 680px; 
+
+      margin: 0 auto; 
+
+    } 
+
+    .bug-report-header { 
+
+      text-align: center; 
+
+      margin-bottom: 40px; 
+
+    } 
+
+    .bug-report-emoji { 
+
+      font-size: 40px; 
+
+      margin-bottom: 16px; 
+
+      display: block; 
+
+    } 
+
+    .bug-report-header h2 { 
+
+      font-family: var(--serif); 
+
+      font-size: clamp(30px, 4vw, 42px); 
+
+      line-height: 1.15; 
+
+      letter-spacing: -1px; 
+
+      margin-bottom: 12px; 
+
+    } 
+
+    .bug-report-header h2 em { 
+
+      font-style: italic; 
+
+      color: var(--accent-bright); 
+
+    } 
+
+    .bug-report-header p { 
+
+      font-size: 16px; 
+
+      color: var(--text-secondary); 
+
+      line-height: 1.7; 
+
+      max-width: 500px; 
+
+      margin: 0 auto; 
+
+    } 
+
+    .bug-report-form { 
+
+      background: var(--bg-card); 
+
+      border: 1px solid var(--border); 
+
+      border-radius: 16px; 
+
+      padding: 36px 36px 40px; 
+
+    } 
+
+    .bug-report-form-grid { 
+
+      display: grid; 
+
+      grid-template-columns: 1fr 1fr; 
+
+      gap: 16px; 
+
+      margin-bottom: 16px; 
+
+    } 
+
+    .br-field { 
+
+      display: flex; 
+
+      flex-direction: column; 
+
+      gap: 6px; 
+
+    } 
+
+    .br-field.full { 
+
+      grid-column: 1 / -1; 
+
+    } 
+
+    .br-field label { 
+
+      font-size: 12px; 
+
+      font-weight: 600; 
+
+      color: var(--text-secondary); 
+
+      letter-spacing: 0.3px; 
+
+    } 
+
+    .br-field label .optional { 
+
+      font-weight: 400; 
+
+      color: var(--text-dim); 
+
+      font-size: 11px; 
+
+    } 
+
+    .br-field input, 
+
+    .br-field textarea, 
+
+    .br-field select { 
+
+      padding: 10px 14px; 
+
+      background: var(--bg); 
+
+      border: 1px solid var(--border); 
+
+      border-radius: 8px; 
+
+      color: var(--text); 
+
+      font-family: var(--sans); 
+
+      font-size: 14px; 
+
+      outline: none; 
+
+      transition: border-color 0.2s, box-shadow 0.2s; 
+
+    } 
+
+    .br-field input:focus, 
+
+    .br-field textarea:focus, 
+
+    .br-field select:focus { 
+
+      border-color: var(--accent); 
+
+      box-shadow: 0 0 0 3px var(--accent-glow); 
+
+    } 
+
+    .br-field input::placeholder, 
+
+    .br-field textarea::placeholder { 
+
+      color: var(--text-dim); 
+
+    } 
+
+    .br-field textarea { 
+
+      min-height: 100px; 
+
+      resize: vertical; 
+
+    } 
+
+    .br-field select { 
+
+      cursor: pointer; 
+
+      appearance: none; 
+
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23565e78' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E"); 
+
+      background-repeat: no-repeat; 
+
+      background-position: right 12px center; 
+
+      padding-right: 32px; 
+
+    } 
+
+    .br-field select option { 
+
+      background: var(--bg-card); 
+
+      color: var(--text); 
+
+    } 
+
+ 
+
+    /* File upload area */ 
+
+    .br-upload-zone { 
+
+      border: 2px dashed var(--border); 
+
+      border-radius: 10px; 
+
+      padding: 24px; 
+
+      text-align: center; 
+
+      cursor: pointer; 
+
+      transition: all 0.25s; 
+
+      position: relative; 
+
+    } 
+
+    .br-upload-zone:hover, 
+
+    .br-upload-zone.dragover { 
+
+      border-color: var(--accent); 
+
+      background: var(--accent-glow); 
+
+    } 
+
+    .br-upload-zone input[type="file"] { 
+
+      position: absolute; 
+
+      inset: 0; 
+
+      opacity: 0; 
+
+      cursor: pointer; 
+
+    } 
+
+    .br-upload-icon { 
+
+      font-size: 28px; 
+
+      margin-bottom: 8px; 
+
+    } 
+
+    .br-upload-text { 
+
+      font-size: 13px; 
+
+      color: var(--text-secondary); 
+
+      line-height: 1.5; 
+
+    } 
+
+    .br-upload-text strong { 
+
+      color: var(--accent-bright); 
+
+    } 
+
+    .br-upload-hint { 
+
+      font-size: 11px; 
+
+      color: var(--text-dim); 
+
+      margin-top: 6px; 
+
+    } 
+
+    .br-file-list { 
+
+      margin-top: 12px; 
+
+      display: flex; 
+
+      flex-direction: column; 
+
+      gap: 6px; 
+
+    } 
+
+    .br-file-item { 
+
+      display: flex; 
+
+      align-items: center; 
+
+      justify-content: space-between; 
+
+      padding: 8px 12px; 
+
+      background: var(--bg); 
+
+      border: 1px solid var(--border); 
+
+      border-radius: 6px; 
+
+      font-size: 12px; 
+
+    } 
+
+    .br-file-item-name { 
+
+      color: var(--text-secondary); 
+
+      overflow: hidden; 
+
+      text-overflow: ellipsis; 
+
+      white-space: nowrap; 
+
+      max-width: 300px; 
+
+    } 
+
+    .br-file-item-remove { 
+
+      background: none; 
+
+      border: none; 
+
+      color: var(--danger, #ef5350); 
+
+      cursor: pointer; 
+
+      font-size: 16px; 
+
+      padding: 0 4px; 
+
+      line-height: 1; 
+
+    } 
+
+    .br-file-item-remove:hover { opacity: 0.7; } 
+
+ 
+
+    .br-submit-row { 
+
+      display: flex; 
+
+      align-items: center; 
+
+      justify-content: space-between; 
+
+      margin-top: 24px; 
+
+    } 
+
+    .br-submit-btn { 
+
+      padding: 12px 32px; 
+
+      background: var(--accent); 
+
+      color: #fff; 
+
+      border: none; 
+
+      border-radius: 10px; 
+
+      font-size: 15px; 
+
+      font-weight: 600; 
+
+      font-family: var(--sans); 
+
+      cursor: pointer; 
+
+      transition: all 0.25s; 
+
+      box-shadow: 0 4px 16px var(--accent-glow-strong); 
+
+    } 
+
+    .br-submit-btn:hover { 
+
+      background: var(--accent-bright); 
+
+      transform: translateY(-1px); 
+
+    } 
+
+    .br-submit-btn:disabled { 
+
+      opacity: 0.5; 
+
+      cursor: not-allowed; 
+
+      transform: none; 
+
+    } 
+
+    .br-privacy-note { 
+
+      font-size: 11px; 
+
+      color: var(--text-dim); 
+
+      max-width: 260px; 
+
+      line-height: 1.5; 
+
+    } 
+
+    .br-success { 
+
+      display: none; 
+
+      text-align: center; 
+
+      padding: 40px 20px; 
+
+    } 
+
+    .br-success.show { display: block; } 
+
+    .br-success-icon { font-size: 48px; margin-bottom: 16px; } 
+
+    .br-success h3 { 
+
+      font-size: 20px; font-weight: 700; 
+
+      margin-bottom: 8px; 
+
+    } 
+
+    .br-success p { 
+
+      font-size: 14px; 
+
+      color: var(--text-secondary); 
+
+      line-height: 1.6; 
+
+    } 
+
+ 
+
+    /* ===== CTA ===== */ 
+
+    .cta-section { 
+
+      padding: 120px 24px; 
+
+      text-align: center; 
+
+      position: relative; 
+
+    } 
+
+    .cta-section .glow-blob.blue { top: 50%; left: 50%; transform: translate(-50%, -50%); width: 800px; height: 400px; } 
+
+    .cta-box { 
+
+      max-width: 700px; 
+
+      margin: 0 auto; 
+
+      padding: 64px 48px; 
+
+      background: var(--bg-card); 
+
+      border: 1px solid var(--border); 
+
+      border-radius: 20px; 
+
+      position: relative; 
+
+      z-index: 1; 
+
+    } 
+
+    .cta-box h2 { 
+
+      font-family: var(--serif); 
+
+      font-size: clamp(32px, 4vw, 44px); 
+
+      line-height: 1.15; 
+
+      letter-spacing: -1px; 
+
+      margin-bottom: 16px; 
+
+    } 
+
+    .cta-box h2 em { font-style: italic; color: var(--accent-bright); } 
+
+    .cta-box p { 
+
+      font-size: 16px; color: var(--text-secondary); 
+
+      margin-bottom: 32px; line-height: 1.6; 
+
+    } 
+
+ 
+
+    /* ===== FOOTER ===== */ 
+
+    footer { 
+
+      padding: 48px 40px; 
+
+      border-top: 1px solid var(--border-subtle); 
+
+      display: flex; align-items: center; justify-content: space-between; 
+
+    } 
+
+    .footer-left { display: flex; align-items: center; gap: 10px; } 
+
+    .footer-text { 
+
+      font-size: 13px; color: var(--text-dim); 
+
+    } 
+
+    .footer-links { display: flex; gap: 24px; } 
+
+    .footer-links a { 
+
+      font-size: 13px; color: var(--text-dim); 
+
+      text-decoration: none; transition: color 0.2s; 
+
+    } 
+
+    .footer-links a:hover { color: var(--text-secondary); } 
+
+ 
+
+    /* ===== ANIMATIONS ===== */ 
+
+    @keyframes fadeUp { 
+
+      from { opacity: 0; transform: translateY(24px); } 
+
+      to { opacity: 1; transform: translateY(0); } 
+
+    } 
+
+    @keyframes pulse { 
+
+      0%, 100% { opacity: 1; } 
+
+      50% { opacity: 0.4; } 
+
+    } 
+
+    @keyframes typeIn { 
+
+      from { width: 0; } 
+
+      to { width: 100%; } 
+
+    } 
+
+ 
+
+    .reveal { 
+
+      opacity: 0; 
+
+      transform: translateY(30px); 
+
+      transition: opacity 0.6s ease, transform 0.6s ease; 
+
+    } 
+
+    .reveal.visible { 
+
+      opacity: 1; 
+
+      transform: translateY(0); 
+
+    } 
+
+ 
+
+    /* ===== RESPONSIVE ===== */ 
+
+    @media (max-width: 900px) { 
+
+      .features-grid { grid-template-columns: 1fr 1fr; } 
+
+      .hiw-steps { grid-template-columns: 1fr; gap: 40px; } 
+
+      .hiw-steps::before { display: none; } 
+
+      .pricing-grid { grid-template-columns: 1fr; max-width: 400px; } 
+
+      .stats { gap: 40px; flex-wrap: wrap; } 
+
+    } 
+
+    @media (max-width: 640px) { 
+
+      nav { padding: 12px 20px; } 
+
+      .nav-links { display: none; } 
+
+      .features-grid { grid-template-columns: 1fr; } 
+
+      .hero-actions { flex-direction: column; } 
+
+      .browser-body { padding: 20px; } 
+
+      footer { flex-direction: column; gap: 16px; text-align: center; } 
+
+    } 
+
+  </style> 
+
+</head> 
+
+<body> 
+
+ 
+
+  <!-- ===== NAV ===== --> 
+
+  <nav id="nav"> 
+
+    <a href="#" class="nav-logo"> 
+
+      <div class="nav-logo-icon" aria-hidden="true"></div> 
+
+    </a> 
+
+    <ul class="nav-links"> 
+
+      <li><a href="#features">Features</a></li> 
+
+      <li><a href="#how-it-works">How It Works</a></li> 
+
+      <li><a href="#coming-soon">What's Coming</a></li> 
+
+      <li><a href="#report">Report a Bug</a></li> 
+
+      <li><a href="https://github.com/anmoltiwari0712/Jobify" class="nav-cta" target="_blank" rel="noreferrer">Get It on GitHub</a></li> 
+
+    </ul> 
+
+  </nav> 
+
+ 
+
+  <!-- ===== HERO ===== --> 
+
+  <section class="hero"> 
+
+    <div class="glow-blob blue"></div> 
+
+    <div class="glow-blob green"></div> 
+
+ 
+
+    <div class="hero-badge"> 
+
+      <span class="hero-badge-dot"></span> 
+
+      Free forever. No catches, no paywalls 
+
+    </div> 
+
+ 
+
+    <h1>Stop retyping.<br>Start applying.</h1> 
+
+ 
+
+    <p class="hero-sub"> 
+
+      You've typed your name, email, and address into 200 job forms. 
+
+      Jobify fills them all in one click so you can focus on landing the job. Completely free. 
+
+    </p> 
+
+ 
+
+    <div class="hero-actions"> 
+
+      <a href="https://github.com/anmoltiwari0712/Jobify" class="btn-primary" target="_blank" rel="noreferrer"> 
+
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12l4 4 4-4M12 8v8"/></svg> 
+
+        Get It on GitHub 
+
+      </a> 
+
+      <a href="#how-it-works" class="btn-ghost">See how it works ↓</a> 
+
+    </div> 
+
+ 
+
+    <div class="hero-visual"> 
+
+      <div class="browser-frame"> 
+
+        <div class="browser-bar"> 
+
+          <div class="browser-dots"> 
+
+            <span></span><span></span><span></span> 
+
+          </div> 
+
+          <div class="browser-url">jobs.workday.com/apply/senior-engineer</div> 
+
+        </div> 
+
+        <div class="browser-body"> 
+
+          <div class="demo-form"> 
+
+            <div class="demo-form-title">Application for Senior Software Engineer</div> 
+
+            <div class="demo-row"> 
+
+              <div class="demo-field"> 
+
+                <div class="demo-field-label">First Name</div> 
+
+                <input class="demo-field-input" data-fill="John" readonly> 
+
+              </div> 
+
+              <div class="demo-field"> 
+
+                <div class="demo-field-label">Last Name</div> 
+
+                <input class="demo-field-input" data-fill="Doe" readonly> 
+
+              </div> 
+
+            </div> 
+
+            <div class="demo-row"> 
+
+              <div class="demo-field"> 
+
+                <div class="demo-field-label">Email Address</div> 
+
+                <input class="demo-field-input" data-fill="john.doe@gmail.com" readonly> 
+
+              </div> 
+
+              <div class="demo-field"> 
+
+                <div class="demo-field-label">Phone</div> 
+
+                <input class="demo-field-input" data-fill="+91 98765 43210" readonly> 
+
+              </div> 
+
+            </div> 
+
+            <div class="demo-row"> 
+
+              <div class="demo-field"> 
+
+                <div class="demo-field-label">LinkedIn</div> 
+
+                <input class="demo-field-input" data-fill="linkedin.com/in/johndoe" readonly> 
+
+              </div> 
+
+              <div class="demo-field"> 
+
+                <div class="demo-field-label">Current Company</div> 
+
+                <input class="demo-field-input" data-fill="Infosys" readonly> 
+
+              </div> 
+
+            </div> 
+
+            <div class="demo-row"> 
+
+              <div class="demo-field"> 
+
+                <div class="demo-field-label">City</div> 
+
+                <input class="demo-field-input" data-fill="Chennai" readonly> 
+
+              </div> 
+
+              <div class="demo-field"> 
+
+                <div class="demo-field-label">Years of Experience</div> 
+
+                <input class="demo-field-input" data-fill="5" readonly> 
+
+              </div> 
+
+            </div> 
+
+          </div> 
+
+        </div> 
+
+      </div> 
+
+    </div> 
+
+  </section> 
+
+ 
+
+  <!-- ===== STATS ===== --> 
+
+  <section class="stats reveal"> 
+
+    <div class="stat"> 
+
+      <div class="stat-number">55+</div> 
+
+      <div class="stat-label">Fields auto-filled</div> 
+
+    </div> 
+
+    <div class="stat"> 
+
+      <div class="stat-number">4</div> 
+
+      <div class="stat-label">Detection strategies</div> 
+
+    </div> 
+
+    <div class="stat"> 
+
+      <div class="stat-number">0</div> 
+
+      <div class="stat-label">Data sent to servers</div> 
+
+    </div> 
+
+    <div class="stat"> 
+
+      <div class="stat-number">&lt;2s</div> 
+
+      <div class="stat-label">To fill any form</div> 
+
+    </div> 
+
+  </section> 
+
+ 
+
+  <!-- ===== FEATURES ===== --> 
+
+  <section class="features" id="features"> 
+
+    <div class="glow-blob blue"></div> 
+
+    <div class="features-header reveal"> 
+
+      <div class="section-eyebrow">Features</div> 
+
+      <h2 class="section-heading">Everything you need.<br>Nothing you don't.</h2> 
+
+      <p class="section-desc">Built specifically for job seekers who are tired of copy-pasting the same data into every application.</p> 
+
+    </div> 
+
+ 
+
+    <div class="features-grid"> 
+
+      <div class="feature-card reveal"> 
+
+        <div class="feature-icon">🧠</div> 
+
+        <h3>4-Layer Smart Detection</h3> 
+
+        <p>Attribute matching, label scanning, placeholder analysis, and DOM context. If there's a field, we'll find it and fill it.</p> 
+
+      </div> 
+
+      <div class="feature-card reveal"> 
+
+        <div class="feature-icon">🎓</div> 
+
+        <h3>Education to Bank Details</h3> 
+
+        <p>10th, 12th, UG, PG percentages. PAN, Aadhaar, passport. CTC, notice period. Every annoying field, handled.</p> 
+
+      </div> 
+
+      <div class="feature-card reveal"> 
+
+        <div class="feature-icon">⚡</div> 
+
+        <h3>Works on Any Site</h3> 
+
+        <p>Workday, Greenhouse, Lever, Taleo, iCIMS, or any custom form. Shadow DOM, iframes, React. All covered.</p> 
+
+      </div> 
+
+      <div class="feature-card reveal"> 
+
+        <div class="feature-icon">🔒</div> 
+
+        <h3>100% Local Storage</h3> 
+
+        <p>Your data never leaves your browser. No accounts, no cloud, no servers. Export as JSON for backup anytime.</p> 
+
+      </div> 
+
+      <div class="feature-card reveal"> 
+
+        <div class="feature-icon">🔍</div> 
+
+        <h3>Field Scanner</h3> 
+
+        <p>Scan any page to see which fields we detected and matched. Debug exactly what's happening before you fill.</p> 
+
+      </div> 
+
+      <div class="feature-card reveal"> 
+
+        <div class="feature-icon">🌍</div> 
+
+        <h3>India + US Ready</h3> 
+
+        <p>Built for both markets. PAN & Aadhaar for India. SSN & EEO for the US. Country-aware dropdown matching.</p> 
+
+      </div> 
+
+    </div> 
+
+  </section> 
+
+ 
+
+  <!-- ===== HOW IT WORKS ===== --> 
+
+  <section class="how-it-works" id="how-it-works"> 
+
+    <div class="glow-blob green"></div> 
+
+    <div class="hiw-header reveal"> 
+
+      <div class="section-eyebrow">How It Works</div> 
+
+      <h2 class="section-heading">Three steps. That's it.</h2> 
+
+      <p class="section-desc">Setup takes 5 minutes. After that, every application takes 5 seconds.</p> 
+
+    </div> 
+
+ 
+
+    <div class="hiw-steps"> 
+
+      <div class="hiw-step reveal"> 
+
+        <div class="hiw-step-number">1</div> 
+
+        <h3>Fill your profile once</h3> 
+
+        <p>Enter your details in the extension popup. 55+ fields organized into collapsible sections. Auto-saves as you type.</p> 
+
+      </div> 
+
+      <div class="hiw-step reveal"> 
+
+        <div class="hiw-step-number">2</div> 
+
+        <h3>Open any job application</h3> 
+
+        <p>Navigate to Workday, Greenhouse, Lever, or any job portal. The extension works silently in the background.</p> 
+
+      </div> 
+
+      <div class="hiw-step reveal"> 
+
+        <div class="hiw-step-number">3</div> 
+
+        <h3>Click fill. Review. Submit.</h3> 
+
+        <p>One click fills every detected field. Green highlights show what was filled. Review, tweak if needed, and submit.</p> 
+
+      </div> 
+
+    </div> 
+
+  </section> 
+
+ 
+
+  <!-- ===== PLATFORMS ===== --> 
+
+  <section class="platforms reveal"> 
+
+    <div class="platforms-label">Works with platforms you already use</div> 
+
+    <div class="platform-logos"> 
+
+      <div class="platform-logo">Workday</div> 
+
+      <div class="platform-logo">Greenhouse</div> 
+
+      <div class="platform-logo">Lever</div> 
+
+      <div class="platform-logo">Taleo</div> 
+
+      <div class="platform-logo">iCIMS</div> 
+
+      <div class="platform-logo">LinkedIn</div> 
+
+      <div class="platform-logo">Indeed</div> 
+
+      <div class="platform-logo">Naukri</div> 
+
+    </div> 
+
+  </section> 
+
+ 
+
+  <!-- ===== FREE FOREVER ===== --> 
+
+  <section class="pricing" id="pricing"> 
+
+    <div class="glow-blob blue"></div> 
+
+    <div class="pricing-header reveal"> 
+
+      <div class="section-eyebrow">Pricing</div> 
+
+      <h2 class="section-heading">Free. Forever. Seriously.</h2> 
+
+      <p class="section-desc">No trials, no credit cards, no "upgrade to unlock." Every feature, every field, unlimited applications. Always free.</p> 
+
+    </div> 
+
+ 
+
+    <div style="max-width: 520px; margin: 0 auto;"> 
+
+      <div class="price-card reveal" style="text-align: center;"> 
+
+        <div class="price-tier" style="color: var(--green);">Free Forever</div> 
+
+        <div class="price-amount">₹0 <span>/ always</span></div> 
+
+        <div class="price-desc" style="margin-bottom: 24px;">No limits. No asterisks. Just faster applications.</div> 
+
+        <ul class="price-features" style="text-align: left; max-width: 300px; margin: 0 auto 32px;"> 
+
+          <li>55+ field auto-fill</li> 
+
+          <li>4-layer smart detection</li> 
+
+          <li>Unlimited applications</li> 
+
+          <li>100% local data storage</li> 
+
+          <li>Export / import profiles</li> 
+
+          <li>Field scanner & debugger</li> 
+
+          <li>Works on all major ATS platforms</li> 
+
+          <li>India + US field support</li> 
+
+        </ul> 
+
+        <a href="https://github.com/anmoltiwari0712/Jobify" class="price-btn primary" style="max-width: 300px; margin: 0 auto;" target="_blank" rel="noreferrer">Get It on GitHub</a> 
+
+      </div> 
+
+    </div> 
+
+  </section> 
+
+ 
+
+  <!-- ===== COMING SOON ANNOUNCEMENT ===== --> 
+
+  <section class="coming-soon" id="coming-soon"> 
+
+    <div class="glow-blob orange-blob"></div> 
+
+    <div class="coming-soon-inner reveal"> 
+
+      <div class="coming-soon-badge">COMING SOON</div> 
+
+      <h2 class="coming-soon-heading">AI is joining Jobify.</h2> 
+
+      <p class="coming-soon-sub">We're building two powerful AI features that will change how you apply for jobs.</p> 
+
+ 
+
+      <div class="coming-soon-cards"> 
+
+        <div class="cs-card"> 
+
+          <div class="cs-card-icon">🧬</div> 
+
+          <div class="cs-card-tag">AI Feature #1</div> 
+
+          <h3>Resume Parser</h3> 
+
+          <p>Upload your resume (PDF or DOCX) and Jobify will extract every field automatically. Name, education, work history, skills, certifications. All 55+ fields populated in seconds. No more manual data entry. Ever.</p> 
+
+          <div class="cs-card-status"> 
+
+            <span class="cs-status-dot"></span> 
+
+            In Development 
+
+          </div> 
+
+        </div> 
+
+        <div class="cs-card"> 
+
+          <div class="cs-card-icon">🎯</div> 
+
+          <div class="cs-card-tag">AI Feature #2</div> 
+
+          <h3>Job-Profile Match Score</h3> 
+
+          <p>Open any job listing and instantly see how well you match. Jobify will analyze the job description against your profile and show a match percentage, with specific skill gaps highlighted so you know exactly where you stand.</p> 
+
+          <div class="cs-card-status"> 
+
+            <span class="cs-status-dot"></span> 
+
+            In Development 
+
+          </div> 
+
+        </div> 
+
+      </div> 
+
+ 
+
+      <form class="cs-notify-form" id="waitlistForm" action="https://formspree.io/f/mzdyznaa" method="POST">
+        <input
+          type="email"
+          name="email"
+          placeholder="your@email.com"
+          class="cs-email-input"
+          required
+        >
+        <input type="hidden" name="source" value="jobify-website-waitlist">
+        <button type="submit" class="cs-notify-btn" id="waitlistSubmit">Notify Me</button>
+      </form>
+
+      <div class="br-success" id="waitlistSuccess">
+        <div class="br-success-icon">🎉</div>
+        <h3>You are on the list.</h3>
+        <p>We will let you know when Jobify is ready. Thanks for raising your hand early.</p>
+      </div>
+
+      </div> 
+
+    </div> 
+
+  </section> 
+
+ 
+
+  <!-- ===== CTA ===== --> 
+
+  <section class="cta-section" id="install"> 
+
+    <div class="glow-blob blue"></div> 
+
+    <div class="cta-box reveal"> 
+
+      <h2>Ready to stop retyping?</h2> 
+
+      <p>Install Jobify in 10 seconds. Fill your profile once. Never type your name into a job form again. Free forever.</p> 
+
+      <a href="https://github.com/anmoltiwari0712/Jobify" class="btn-primary" style="display: inline-flex;" target="_blank" rel="noreferrer"> 
+
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12l4 4 4-4M12 8v8"/></svg> 
+
+        Download from GitHub 
+
+      </a> 
+
+    </div> 
+
+  </section> 
+
+ 
+
+  <!-- ===== BUG REPORT / HELP US ===== --> 
+
+  <section class="bug-report" id="report"> 
+
+    <div class="bug-report-inner reveal"> 
+
+      <div class="bug-report-header"> 
+
+        <span class="bug-report-emoji">🛠️</span> 
+
+        <h2>We're learning. Help us get better.</h2> 
+
+        <p>Jobify is young and we know it won't be perfect on every site yet. If something didn't fill right, a field got missed, or things broke entirely, tell us. Every report makes Jobify smarter for everyone.</p> 
+
+      </div> 
+
+ 
+
+      <div class="bug-report-form" id="bugFormContainer"> 
+
+        <form id="bugForm" action="https://formspree.io/f/mgorvglr" method="POST" enctype="multipart/form-data"> 
+
+          <div class="bug-report-form-grid"> 
+
+            <div class="br-field"> 
+
+              <label>Your Name <span class="optional">(optional)</span></label> 
+
+              <input type="text" id="brName" name="name" placeholder="Jane Doe"> 
+
+            </div> 
+
+            <div class="br-field"> 
+
+              <label>Email <span class="optional">(so we can follow up)</span></label> 
+
+              <input type="email" id="brEmail" name="email" placeholder="jane@example.com"> 
+
+            </div> 
+
+ 
+
+            <div class="br-field full"> 
+
+              <label>Website / URL where it failed</label> 
+
+              <input type="url" id="brUrl" name="failed_url" placeholder="https://jobs.workday.com/apply/..."> 
+
+            </div> 
+
+ 
+
+            <div class="br-field"> 
+
+              <label>Issue Type</label> 
+
+              <select id="brType" name="issue_type"> 
+
+                <option value="">Select issue type...</option> 
+
+                <option value="field-missed">Field wasn't detected</option> 
+
+                <option value="wrong-fill">Wrong data filled in a field</option> 
+
+                <option value="partial">Only some fields filled</option> 
+
+                <option value="nothing">Nothing happened at all</option> 
+
+                <option value="dropdown">Dropdown didn't match</option> 
+
+                <option value="crash">Extension crashed / error</option> 
+
+                <option value="suggestion">Feature suggestion</option> 
+
+                <option value="other">Other</option> 
+
+              </select> 
+
+            </div> 
+
+            <div class="br-field"> 
+
+              <label>Browser</label> 
+
+              <select id="brBrowser" name="browser"> 
+
+                <option value="">Select browser...</option> 
+
+                <option value="chrome">Google Chrome</option> 
+
+                <option value="brave">Brave</option> 
+
+                <option value="edge">Microsoft Edge</option> 
+
+                <option value="opera">Opera</option> 
+
+                <option value="other">Other Chromium</option> 
+
+              </select> 
+
+            </div> 
+
+ 
+
+            <div class="br-field full"> 
+
+              <label>Describe what happened</label> 
+
+              <textarea id="brDescription" name="description" placeholder="E.g., 'On the Workday application for Amazon, the City field wasn't detected. The label says City/Town and it's inside an iframe...'"></textarea> 
+
+            </div> 
+
+ 
+
+            <div class="br-field full"> 
+
+              <label>Attachments <span class="optional">(screenshots, screen recordings)</span></label> 
+
+              <div class="br-upload-zone" id="uploadZone"> 
+
+                <input type="file" id="brFiles" name="attachments" multiple accept="image/*,video/*,.pdf,.txt,.json"> 
+
+                <div class="br-upload-icon">📎</div> 
+
+                <div class="br-upload-text"><strong>Click to upload</strong> or drag & drop</div> 
+
+                <div class="br-upload-hint">Screenshots, screen recordings, or any file that helps. Max 10MB each.</div> 
+
+              </div> 
+
+              <div class="br-file-list" id="fileList"></div> 
+
+            </div> 
+
+          </div> 
+
+ 
+
+          <div class="br-submit-row"> 
+
+            <div class="br-privacy-note">Your report helps us fix issues faster. We'll never share your info or spam you.</div> 
+
+            <input type="hidden" name="source" value="jobify-website-bug-report">
+            <button type="submit" class="br-submit-btn" id="brSubmit">Submit Report</button> 
+
+          </div> 
+
+        </form> 
+
+ 
+
+        <div class="br-success" id="bugSuccess"> 
+
+          <div class="br-success-icon">🎉</div> 
+
+          <h3>Report received. Thank you!</h3> 
+
+          <p>We'll look into this and improve Jobify. If you left your email, we'll follow up once it's fixed. You're helping make job applications less painful for everyone.</p> 
+
+        </div> 
+
+      </div> 
+
+    </div> 
+
+  </section> 
+
+ 
+
+  <!-- ===== FOOTER ===== --> 
+
+  <footer> 
+
+    <div class="footer-left"> 
+
+      <div class="nav-logo-icon" style="width:24px;height:24px;border-radius:6px;" aria-hidden="true"></div> 
+
+      <span class="footer-text">© 2026 Jobify. Free forever. Built for job seekers.</span> 
+
+    </div> 
+
+    <div class="footer-links"> 
+
+      <a href="#">Privacy</a> 
+
+      <a href="#">Terms</a> 
+
+      <a href="https://github.com/anmoltiwari0712/Jobify" target="_blank" rel="noreferrer">GitHub</a> 
+
+      <a href="#">Contact</a> 
+
+    </div> 
+
+  </footer> 
+
+ 
+
+  <!-- ===== SCRIPTS ===== --> 
+
+  <script> 
+
+    // NAV SCROLL EFFECT 
+
+    const nav = document.getElementById('nav'); 
+
+    window.addEventListener('scroll', () => { 
+
+      nav.classList.toggle('scrolled', window.scrollY > 40); 
+
+    }); 
+
+ 
+
+    // SCROLL REVEAL 
+
+    const observer = new IntersectionObserver((entries) => { 
+
+      entries.forEach((entry, i) => { 
+
+        if (entry.isIntersecting) { 
+
+          setTimeout(() => entry.target.classList.add('visible'), i * 80); 
+
+          observer.unobserve(entry.target); 
+
+        } 
+
+      }); 
+
+    }, { threshold: 0.15 }); 
+
+ 
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el)); 
+
+ 
+
+    // HERO FORM FILL ANIMATION 
+
+    function runFillAnimation() { 
+
+      const fields = document.querySelectorAll('.demo-field-input'); 
+
+      fields.forEach((field, i) => { 
+
+        setTimeout(() => { 
+
+          const value = field.dataset.fill; 
+
+          field.classList.add('filled'); 
+
+          typeText(field, value); 
+
+        }, 800 + i * 250); 
+
+      }); 
+
+    } 
+
+ 
+
+    function typeText(input, text) { 
+
+      let i = 0; 
+
+      input.value = ''; 
+
+      const interval = setInterval(() => { 
+
+        if (i < text.length) { 
+
+          input.value += text[i]; 
+
+          i++; 
+
+        } else { 
+
+          clearInterval(interval); 
+
+        } 
+
+      }, 30); 
+
+    } 
+
+ 
+
+    // Run animation when hero is visible 
+
+    const heroObserver = new IntersectionObserver((entries) => { 
+
+      if (entries[0].isIntersecting) { 
+
+        setTimeout(runFillAnimation, 600); 
+
+        heroObserver.disconnect(); 
+
+      } 
+
+    }); 
+
+    heroObserver.observe(document.querySelector('.hero-visual')); 
+
+ 
+
+    // ===== BUG REPORT FORM ===== 
+
+    const uploadZone = document.getElementById('uploadZone'); 
+
+    const fileInput = document.getElementById('brFiles'); 
+
+    const fileListEl = document.getElementById('fileList'); 
+
+    let uploadedFiles = []; 
+
+ 
+
+    // Drag and drop 
+
+    uploadZone.addEventListener('dragover', (e) => { 
+
+      e.preventDefault(); 
+
+      uploadZone.classList.add('dragover'); 
+
+    }); 
+
+    uploadZone.addEventListener('dragleave', () => { 
+
+      uploadZone.classList.remove('dragover'); 
+
+    }); 
+
+    uploadZone.addEventListener('drop', (e) => { 
+
+      e.preventDefault(); 
+
+      uploadZone.classList.remove('dragover'); 
+
+      handleFiles(e.dataTransfer.files); 
+
+    }); 
+
+ 
+
+    fileInput.addEventListener('change', (e) => { 
+
+      handleFiles(e.target.files); 
+
+      fileInput.value = ''; 
+
+    }); 
+
+ 
+
+    function handleFiles(files) { 
+
+      for (const file of files) { 
+
+        if (file.size > 10 * 1024 * 1024) { 
+
+          alert(`"${file.name}" is too large. Max 10MB per file.`); 
+
+          continue; 
+
+        } 
+
+        if (uploadedFiles.length >= 5) { 
+
+          alert('Maximum 5 files allowed.'); 
+
+          break; 
+
+        } 
+
+        uploadedFiles.push(file); 
+
+      } 
+
+      renderFileList(); 
+
+    } 
+
+ 
+
+    function renderFileList() { 
+
+      fileListEl.innerHTML = ''; 
+
+      uploadedFiles.forEach((file, idx) => { 
+
+        const item = document.createElement('div'); 
+
+        item.className = 'br-file-item'; 
+
+        const sizeMB = (file.size / (1024 * 1024)).toFixed(1); 
+
+        item.innerHTML = ` 
+
+          <span class="br-file-item-name">${file.name} <span style="color:var(--text-dim)">(${sizeMB}MB)</span></span> 
+
+          <button class="br-file-item-remove" data-idx="${idx}">✕</button> 
+
+        `; 
+
+        fileListEl.appendChild(item); 
+
+      }); 
+
+ 
+
+      fileListEl.querySelectorAll('.br-file-item-remove').forEach(btn => { 
+
+        btn.addEventListener('click', () => { 
+
+          uploadedFiles.splice(parseInt(btn.dataset.idx), 1); 
+
+          renderFileList(); 
+
+        }); 
+
+      }); 
+
+    } 
+
+ 
+
+    async function submitFormspree(form, formData) {
+
+      const response = await fetch(form.action, {
+
+        method: 'POST',
+
+        body: formData,
+
+        headers: {
+
+          Accept: 'application/json',
+
+        },
+
+      });
+
+
+
+      if (!response.ok) {
+
+        throw new Error('Form submission failed');
+
+      }
+
+    }
+
+
+
+    document.getElementById('waitlistForm').addEventListener('submit', async (e) => {
+
+      e.preventDefault();
+
+      const form = e.currentTarget;
+
+      const btn = document.getElementById('waitlistSubmit');
+
+      btn.disabled = true;
+
+      btn.textContent = 'Joining...';
+
+
+
+      try {
+
+        await submitFormspree(form, new FormData(form));
+
+        form.style.display = 'none';
+
+        document.getElementById('waitlistSuccess').classList.add('show');
+
+      } catch (error) {
+
+        btn.disabled = false;
+
+        btn.textContent = 'Try Again';
+
+      }
+
+    });
+
+
+
+    document.getElementById('bugForm').addEventListener('submit', async (e) => {
+
+      e.preventDefault();
+
+      const form = e.currentTarget;
+
+      const desc = document.getElementById('brDescription').value.trim();
+
+
+
+      if (!desc) {
+
+        document.getElementById('brDescription').style.borderColor = '#ef5350';
+
+        document.getElementById('brDescription').focus();
+
+        setTimeout(() => {
+
+          document.getElementById('brDescription').style.borderColor = '';
+
+        }, 2000);
+
+        return;
+
+      }
+
+
+
+      const btn = document.getElementById('brSubmit');
+
+      const originalText = btn.textContent;
+
+      btn.disabled = true;
+
+      btn.textContent = 'Submitting...';
+
+
+
+      const formData = new FormData(form);
+
+      formData.delete('attachments');
+
+      uploadedFiles.forEach((file) => {
+
+        formData.append('attachments', file);
+
+      });
+
+
+
+      try {
+
+        await submitFormspree(form, formData);
+
+        form.style.display = 'none';
+
+        document.getElementById('bugSuccess').classList.add('show');
+
+      } catch (error) {
+
+        btn.disabled = false;
+
+        btn.textContent = 'Try Again';
+
+        setTimeout(() => {
+
+          btn.textContent = originalText;
+
+        }, 2500);
+
+      }
+
+    }); 
+
+  </script> 
+
+ 
+
+</body> 
+
+</html> 
