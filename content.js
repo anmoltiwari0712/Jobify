@@ -566,7 +566,7 @@
       dataAutomation: [],
     },
     preferredLocation: {
-      labels: ["preferred location", "preferred work location", "desired location", "work location preference"],
+      labels: ["preferred location", "preferred work location", "desired location", "work location preference","location"],
       attributes: [
         "preferredlocation", "preferred_location", "desiredlocation",
         "desired_location", "worklocation", "work_location",
